@@ -98,7 +98,6 @@ def _generate_fitfile(data=None, endian='<'):
 
 class FitReaderTestCase(unittest.TestCase):
 
-    @unittest.skip('TEMPORARY SKIPPED TEST -- MUST BE REMOVED BEFORE COMMIT -- TODO XXX FIXME')
     def test_raw_chunk_parsing(self):
         """
         Test that FitReader parses correctly all our "valid" test files by
