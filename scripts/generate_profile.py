@@ -419,7 +419,7 @@ def parse_messages(messages_rows, type_list):
             if row[1] is not None and row[1] != b'':
                 field = FieldInfo(
                     name=row[2].decode(), type=row[3].decode(), num=maybe_decode(row[1]), scale=fix_scale(row[6]),
-                    offset=row[7], units=fix_units(row[8].decode()), components=[],
+                    offset=maybe_decode(row[7]), units=fix_units(row[8].decode()), components=[],
                     subfields=[], comment=row[13].decode(),
                 )
 
@@ -437,7 +437,7 @@ def parse_messages(messages_rows, type_list):
                 # Sub fields
                 subfield = SubFieldInfo(
                     name=row[2].decode(), num=field.num, type=row[3].decode(), scale=fix_scale(row[6]),
-                    offset=row[7], units=fix_units(row[8].decode()), ref_fields=[],
+                    offset=maybe_decode(row[7]), units=fix_units(row[8].decode()), ref_fields=[],
                     components=[], comment=row[13].decode(),
                 )
 
