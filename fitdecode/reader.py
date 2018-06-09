@@ -77,7 +77,6 @@ class FitReader:
 
         # state (private)
         self._fd = None        # the file object to read from
-        self._fd_view = None   # memoryview of self._fd, if possible
         self._read_offset = 0  # read cursor position in the file
         self._read_size = 0    # count bytes read from this file so far in total
 
@@ -99,21 +98,10 @@ class FitReader:
 
         if hasattr(fileish, 'read'):
             self._fd = fileish
-
-            try:
-                self._fd_view = self._fd.getbuffer()
-
-                if (not isinstance(self._fd_view, memoryview) or
-                        not len(self._fd_view) or
-                        type(self._fd_view[0]) is not int):
-                    self._fd_view = None
-            except AttributeError:
-                pass
         elif hasattr(fileish, '__fspath__') or isinstance(fileish, str):
             self._fd = open(os.fspath(fileish), mode='rb')
         else:
             self._fd = io.BytesIO(fileish)
-            self._fd_view = self._fd.getbuffer()
 
         try:
             self._read_offset = self._fd.tell()
@@ -166,7 +154,6 @@ class FitReader:
             self._fd.close()
 
         self._fd = None
-        self._fd_view = None
         self._read_offset = 0
         self._read_size = 0
         self._chunk_offset = 0
@@ -288,7 +275,7 @@ class FitReader:
             profile_ver=profile_ver,
             body_size=body_size,
             crc=read_crc,
-            chunk=self._keep_chunk_or_view(chunk))
+            chunk=self._keep_chunk(chunk))
         self._body_bytes_left = body_size
 
     def _read_crc(self):
@@ -299,7 +286,7 @@ class FitReader:
             # print(f'{computed_crc:#x} {read_crc:#x}')
             raise FitCRCError()
 
-        return records.FitCrc(read_crc, self._keep_chunk_or_view(chunk))
+        return records.FitCrc(read_crc, self._keep_chunk(chunk))
 
     def _read_record(self):
         # read header
@@ -409,7 +396,7 @@ class FitReader:
             endian,
             field_defs,
             dev_field_defs,
-            self._keep_chunk_or_view(record_chunks))
+            self._keep_chunk(record_chunks))
 
         # According to FIT protocol's specification (section 4.8.3), it is ok to
         # redefine message types
@@ -518,7 +505,7 @@ class FitReader:
             record_header.time_offset,
             def_mesg,
             message_fields,
-            self._keep_chunk_or_view(record_chunks))
+            self._keep_chunk(record_chunks))
 
         self._processor.run_message_processor(data_message)
 
@@ -589,26 +576,14 @@ class FitReader:
 
         return chunk
 
-    def _keep_chunk_or_view(self, chunk):
+    def _keep_chunk(self, chunk):
         if not self._keep_raw:
             return None
 
         assert chunk
         assert type(chunk) in (list, tuple, bytes)
 
-        if self._fd_view:
-            if __debug__:
-                if type(chunk) in (list, tuple):
-                    assert sum(map(lambda x: len(x), chunk)) == self._chunk_size
-                else:
-                    assert len(chunk) == self._chunk_size
-
-            end = self._chunk_offset + self._chunk_size
-            return records.FitChunk(
-                self._chunk_offset,
-                self._fd_view[self._chunk_offset:end])
-
-        elif type(chunk) in (list, tuple):
+        if type(chunk) in (list, tuple):
             # *chunk* is a list of chunks
             assert sum(map(lambda x: len(x), chunk)) == self._chunk_size
             return records.FitChunk(self._chunk_offset, b''.join(chunk))
