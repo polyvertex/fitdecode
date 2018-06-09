@@ -21,9 +21,9 @@ class FitCrcError(FitError):
 
 class FitEOFError(FitError):
     def __init__(self, expected, got, offset, message=''):
-        self.expected = expected  # count of bytes
-        self.got = got
-        self.offset = offset
+        self.expected = expected  #: number of expected bytes
+        self.got = got            #: number of bytes read
+        self.offset = offset  #: the file offset from which reading took place
 
         desc = f'expected {self.expected} bytes, got {self.got} @ {self.offset}'
         if not message:
@@ -36,7 +36,10 @@ class FitEOFError(FitError):
 
 class FitParseError(FitError):
     def __init__(self, offset, message=''):
+        self.offset = offset  #: the file offset from which reading took place
+
         desc = 'FIT parsing error @ ' + str(offset)
         if message:
             desc += ': ' + message
+
         super().__init__(desc)

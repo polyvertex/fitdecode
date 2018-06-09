@@ -622,7 +622,7 @@ class FitReader:
 
         try:
             application_id = message.get_field('application_id').raw_value
-        except AttributeError:
+        except KeyError:
             application_id = None
 
         # declare/overwrite type
@@ -643,9 +643,11 @@ class FitReader:
         field_name = message.get_field('field_name').raw_value
         units = message.get_field('units').raw_value
 
-        native_field_num = message.get_field('native_field_num')
-        if native_field_num is not None:
+        try:
+            native_field_num = message.get_field('native_field_num')
             native_field_num = native_field_num.raw_value
+        except KeyError:
+            native_field_num = None
 
         fields = self._dev_types[int(dev_data_index)]['fields']
 

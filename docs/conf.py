@@ -52,7 +52,7 @@ rst_epilog = """
 primary_domain = 'py'
 default_role = 'any'
 
-highlight_language = 'python3'
+#highlight_language = 'python3'
 pygments_style = 'sphinx'
 
 # ext.autodoc config

@@ -28,12 +28,29 @@ Read a FIT file, chunk by chunk:
             pass
 
 
+Installation
+============
+
+fitdecode is available on `PyPI <https://pypi.org/project/fitdecode/>`_::
+
+    $ pip install fitdecode
+
+
+Or you can clone fitdecode's `source code repository
+<https://github.com/polyvertex/fitdecode>`_ before installing it::
+
+    $ git clone git@github.com:polyvertex/fitdecode.git
+    $ cd fitdecode
+    $ python setup.py test     # optional step to run unit tests
+    $ python setup.py install
+
+
 Overview
 ========
 
-fitdecode is a (non offensive) rewrite of the fitparse_ library, with some
-improvements and additional features, as well as efforts made to optimize both
-speed and memory usage.
+fitdecode is a non offensive and incompatible rewrite of the fitparse_ library,
+with some improvements and additional features, as well as efforts made to
+optimize both speed and memory usage.
 
 Main differences between fitdecode and fitparse:
 
@@ -46,7 +63,8 @@ Main differences between fitdecode and fitparse:
   compatible with fitparse's FitFile
 
 * fitdecode does not discard the FIT header and the CRC footer while iterating
-  a file, which allow to get a 1:1 representation of the file that is being read
+  a file, which allow to get a complete 1:1 representation of the file that is
+  being read
 
 * This also allows the client to easily deal with so-called chained FIT files,
   as per FIT SDK definition (i.e. concatenated FIT files)
@@ -59,7 +77,7 @@ Main differences between fitdecode and fitparse:
   allow data processing and consolidation at file level.
 
   One typical use case example is the ``hr`` messages that are appended by
-  Garmin watches (at least) to a "swim" activity during the post-activity
+  Garmin watches (at least) to a "swim" activity file during the post-activity
   synchronization step, when the HRM strap sends its data to the watch.
 
   The content of these ``hr`` messages (heart rate) has to be merged to the
@@ -89,7 +107,7 @@ Credits
 fitdecode is largely based on the generic approach adopted by fitparse_ to
 define FIT types and to decode raw values. That includes the module
 ``profile.py`` and all the classes it refers to, as well as the script
-``generate_profile.py`` (only slightly modified).
+``generate_profile.py``.
 
 
 
