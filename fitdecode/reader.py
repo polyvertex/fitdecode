@@ -10,7 +10,7 @@ import io
 import os
 import struct
 
-from .exceptions import FitHeaderError, FitCrcError, FitEOFError, FitParseError
+from .exceptions import FitHeaderError, FitCRCError, FitEOFError, FitParseError
 from . import records
 from . import types
 from . import utils
@@ -274,7 +274,7 @@ class FitReader:
                 else:
                     computed_crc = utils.compute_crc(chunk)
                     if computed_crc != read_crc:
-                        raise FitCrcError('invalid FIT header CRC')
+                        raise FitCRCError('invalid FIT header CRC')
 
             chunk += extra_chunk
 
@@ -297,7 +297,7 @@ class FitReader:
 
         if self.check_crc and computed_crc != read_crc:
             # print(f'{computed_crc:#x} {read_crc:#x}')
-            raise FitCrcError()
+            raise FitCRCError()
 
         return records.FitCrc(read_crc, self._keep_chunk_or_view(chunk))
 

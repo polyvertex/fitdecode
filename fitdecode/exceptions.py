@@ -15,7 +15,7 @@ class FitHeaderError(FitError):
     pass
 
 
-class FitCrcError(FitError):
+class FitCRCError(FitError):
     pass
 
 
