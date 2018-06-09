@@ -1,0 +1,54 @@
+{
+    "folders":
+    [
+        {
+            "path": ".",
+            "folder_exclude_patterns":
+            [
+                "build",
+                "dist",
+                "docs/_build"
+            ]
+        }
+    ],
+
+    "build_systems":
+    [
+        {
+            "name": "fitdecode - Code Style - Active File",
+            "working_dir": "$project_path",
+            "cmd": ["/usr/bin/env", "python3", "-m", "flake8", "$file"],
+            "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
+            "selector": "source.python",
+            "quiet": true,
+            "word_wrap": false,
+
+            "env": {"PYTHONIOENCODING": "utf-8"},
+
+            "windows":
+            {
+                "cmd": ["tools\\python.cmd", "-m", "flake8", "$file"]
+            }
+        },
+
+        // A new build system has to be declared for this instead of just
+        // declaring it as a variant of the one above because Sublime does not
+        // seem to support the "selector" on a per-variant basis.
+        // At least not in build 3143.
+        {
+            "name": "fitdecode - Code Style - Full Project",
+            "working_dir": "$project_path",
+            "cmd": ["/usr/bin/env", "python3", "-m", "flake8"],
+            "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
+            "quiet": false,
+            "word_wrap": false,
+
+            "env": {"PYTHONIOENCODING": "utf-8"},
+
+            "windows":
+            {
+                "cmd": ["tools\\python.cmd", "-m", "flake8"]
+            }
+        }
+    ]
+}

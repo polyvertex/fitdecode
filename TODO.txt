@@ -1,0 +1,9 @@
+* Unit tests
+* fitdump script (do not forget to add it to setup.py)
+* Pipenv
+* pytest
+* Travis CI
+* AppVeyor CI
+* Coverage.py???
+* Check for PyPy compliance once it's compatible with 3.6+ (3.5 only atm)
+* Improve docs
