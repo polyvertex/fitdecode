@@ -7,7 +7,8 @@
 # See the LICENSE.txt file at the root of this project.
 
 
-__all__ = ['FitHeader', 'FitCrc', 'FitDefinitionMessage', 'FitDataMessage']
+__all__ = [
+    'FitChunk', 'FitHeader', 'FitCrc', 'FitDefinitionMessage', 'FitDataMessage']
 
 
 class FitChunk:
@@ -32,20 +33,6 @@ class FitHeader:
         self.crc = crc  #: may be null
         self.chunk = chunk
 
-    def __repr__(self):
-        chunk_repr = \
-            ' [{} B @ {}]'.format(len(self.chunk.bytes), self.chunk.offset) \
-            if self.chunk else ''
-
-        return '<{} size:{} proto:{} profile:{} body_size:{} crc:{}{}>'.format(
-            self.__class__.__name__,
-            self.header_size,
-            self.proto_ver,
-            self.profile_ver,
-            self.body_size,
-            '{:#x}'.format(self.crc) if self.crc else self.crc,
-            chunk_repr)
-
 
 class FitCrc:
     __slots__ = ('crc', 'chunk')
@@ -53,16 +40,6 @@ class FitCrc:
     def __init__(self, crc, chunk):
         self.crc = crc
         self.chunk = chunk
-
-    def __repr__(self):
-        chunk_repr = \
-            ' [{} B @ {}]'.format(len(self.chunk.bytes), self.chunk.offset) \
-            if self.chunk else ''
-
-        return '<{} crc:{}{}>'.format(
-            self.__class__.__name__,
-            '{:#x}'.format(self.crc) if self.crc else self.crc,
-            chunk_repr)
 
 
 class FitDefinitionMessage:
@@ -94,24 +71,6 @@ class FitDefinitionMessage:
         self.dev_field_defs = dev_field_defs
         self.chunk = chunk
 
-    def __repr__(self):
-        chunk_repr = \
-            ' [{} B @ {}]'.format(len(self.chunk.bytes), self.chunk.offset) \
-            if self.chunk else ''
-
-        return ('<{} is_dev:{} local_mesg_num:{} global_mesg_num:{} ' +
-                'time_offset:{} endian:\'{}\' field_defs:{} ' +
-                'dev_field_defs:{}{}>').format(
-            self.__class__.__name__,
-            self.is_developer_data,
-            self.local_mesg_num,
-            self.global_mesg_num,
-            self.time_offset,
-            self.endian,
-            len(self.field_defs),
-            len(self.dev_field_defs),
-            chunk_repr)
-
     @property
     def name(self):
         if self.mesg_type:
@@ -139,21 +98,6 @@ class FitDataMessage:
         self.def_mesg = def_mesg  #: `FitDefinitionMessage`
         self.fields = fields
         self.chunk = chunk
-
-    def __repr__(self):
-        chunk_repr = \
-            ' [{} B @ {}]'.format(len(self.chunk.bytes), self.chunk.offset) \
-            if self.chunk else ''
-
-        return ('<{} is_dev:{} local_mesg_num:{} {} time_offset:{} ' +
-                'fields:[{}]{}>').format(
-            self.__class__.__name__,
-            self.is_developer_data,
-            self.local_mesg_num,
-            repr(self.def_mesg),
-            self.time_offset,
-            ', '.join(repr(x) for x in self.fields),
-            chunk_repr)
 
     def __iter__(self):
         # sort by whether this is a known field, then its name

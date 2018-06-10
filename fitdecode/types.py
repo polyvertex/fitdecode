@@ -29,10 +29,6 @@ class BaseType:
         """"Base Type Number" as per SDK definition"""
         return self.identifier & 0x1F
 
-    def __repr__(self):
-        return '<BaseType: {} (#{} [{:#x}])>'.format(
-            self.name, self.type_num, self.identifier)
-
 
 class FieldType:
     __slots__ = ('name', 'base_type', 'enum')
@@ -41,9 +37,6 @@ class FieldType:
         self.name = name
         self.base_type = base_type
         self.enum = enum
-
-    def __repr__(self):
-        return '<FieldType: {} ({})>'.format(self.name, self.base_type.name)
 
 
 class _FieldAndSubFieldBase:
@@ -188,10 +181,6 @@ class MessageType:
         self.mesg_num = mesg_num
         self.fields = fields
 
-    def __repr__(self):
-        # TODO
-        return '<MessageType: %s (#%d)>' % (self.name, self.mesg_num)
-
 
 class FieldDefinition:
     __slots__ = ('field', 'def_num', 'base_type', 'size')
@@ -210,14 +199,6 @@ class FieldDefinition:
     def type(self):
         return self.field.type if self.field else self.base_type
 
-    def __repr__(self):
-        # TODO
-        return '<FieldDefinition: %s (#%d) -- type: %s (%s), size: %d byte%s>' % (
-            self.name,
-            self.def_num,
-            self.type.name, self.base_type.name,
-            self.size, 's' if self.size != 1 else '')
-
 
 class DevFieldDefinition:
     __slots__ = ('field', 'dev_data_index', 'base_type', 'def_num', 'size')
@@ -230,15 +211,6 @@ class DevFieldDefinition:
 
         # for dev fields, the base_type and type are always the same
         self.base_type = self.type
-
-    def __repr__(self):
-        # TODO
-        return '<DevFieldDefinition: %s:%s (#%d) -- type: %s, size: %d byte%s>' % (
-            self.name,
-            self.dev_data_index,
-            self.def_num,
-            self.type.name,
-            self.size, 's' if self.size != 1 else '')
 
     @property
     def name(self):
@@ -253,7 +225,8 @@ class DevFieldDefinition:
 
 
 class FieldData(object):
-    __slots__ = ('field_def', 'field', 'parent_field', 'value', 'raw_value', 'units')
+    __slots__ = (
+        'field_def', 'field', 'parent_field', 'value', 'raw_value', 'units')
 
     def __init__(self, field_def, field, parent_field, value, raw_value,
                  units=None):
@@ -269,12 +242,6 @@ class FieldData(object):
             # NOTE: Not a property since you may want to override this in a data
             # processor
             self.units = self.field.units
-
-    def __repr__(self):
-        # TODO
-        return '<FieldData: %s: %s%s, def num: %d, type: %s (%s), raw value: %s>' % (
-            self.name, self.value, ' [%s]' % self.units if self.units else '',
-            self.def_num, self.type.name, self.base_type.name, self.raw_value)
 
     @property
     def name(self):
