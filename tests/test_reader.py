@@ -177,13 +177,7 @@ class FitReaderTestCase(unittest.TestCase):
             keep_raw_chunks=False))
 
         file_header = fit[0]
-
-        file_id = None
-        for mesg in fit:
-            if isinstance(mesg, fitdecode.FitDataMessage) and mesg.name == 'file_id':
-                file_id = mesg
-                break
-        self.assertTrue(file_id, 'file_id not found')
+        file_id = fit[2]  # 1 is the definition message
 
         self.assertEqual(file_header.profile_ver, (1, 52))
         self.assertEqual(file_header.proto_ver, (1, 0))
@@ -227,7 +221,7 @@ class FitReaderTestCase(unittest.TestCase):
             check_crc=True,
             keep_raw_chunks=False))
 
-        # build a generator of 'record' messages only
+        # make a generator of 'record' messages
         records = (
             r for r in fit
             if isinstance(r, fitdecode.FitDataMessage)
@@ -256,6 +250,208 @@ class FitReaderTestCase(unittest.TestCase):
             self.assertAlmostEqual(record.get_field('distance').value, float(distance))
 
         self.assertEqual(count, 753)  # TODO: confirm size(records) = size(csv)
+        csv_fp.close()
+
+    def test_fitparse_component_field_resolves_subfield(self):
+        fit_data = _generate_fitfile(
+            _generate_messages(
+                # event (21), local message 1
+                mesg_num=21, local_mesg_num=1, field_defs=[
+                    # event, event_type, data16
+                    (0, 'enum'), (1, 'enum'), (2, 'uint16')],
+                data=[[0, 0, 2]]))
+
+        # parse the whole content
+        fit = tuple(fitdecode.FitReader(
+            fit_data, check_crc=True, keep_raw_chunks=False))
+
+        event = fit[4]
+        self.assertEqual(event.name, 'event')
+
+        for field in ('event', 0):
+            self.assertEqual(event.get_field(field).value, 'timer')
+            self.assertEqual(event.get_field(field).raw_value, 0)
+
+        for field in ('event_type', 1):
+            self.assertEqual(event.get_field(field).value, 'start')
+            self.assertEqual(event.get_field(field).raw_value, 0)
+
+        # should be able to reference by original field name, component field
+        # name, subfield name, and then the field def_num of both the original
+        # field and component field
+        for field in ('timer_trigger', 'data', 3):
+            self.assertEqual(event.get_field(field).value, 'fitness_equipment')
+            self.assertEqual(event.get_field(field).raw_value, 2)
+
+        # component field should be left as is
+        for field in ('data16', 2):
+            self.assertEqual(event.get_field(field).value, 2)
+
+    def test_fitparse_subfield_components(self):
+        # score = 123, opponent_score = 456, total = 29884539
+        sport_point_value = 123 + (456 << 16)
+
+        # rear_gear_num = 4, rear_gear, = 20, front_gear_num = 2, front_gear = 34
+        gear_chance_value = 4 + (20 << 8) + (2 << 16) + (34 << 24)
+
+        fit_data = _generate_fitfile(
+            _generate_messages(
+                # event (21), local message 1
+                mesg_num=21, local_mesg_num=1, field_defs=[
+                    # event, data
+                    (0, 'enum'), (3, 'uint32')],
+                data=[
+                    # sport point
+                    [33, sport_point_value],
+                    # front gear change
+                    [42, gear_chance_value]]))
+
+        # parse the whole content
+        fit = tuple(fitdecode.FitReader(
+            fit_data, check_crc=True, keep_raw_chunks=False))
+
+        sport_point = fit[4]
+        self.assertEqual(sport_point.name, 'event')
+
+        for field in ('event', 0):
+            self.assertEqual(sport_point.get_field(field).value, 'sport_point')
+            self.assertEqual(sport_point.get_field(field).raw_value, 33)
+
+        for field in ('sport_point', 'data', 3):
+            # verify raw numeric value
+            self.assertEqual(sport_point.get_field(field).value, sport_point_value)
+
+        for field in ('score', 7):
+            self.assertEqual(sport_point.get_field(field).value, 123)
+
+        for field in ('opponent_score', 8):
+            self.assertEqual(sport_point.get_field(field).value, 456)
+
+        gear_change = fit[5]
+        self.assertEqual(gear_change.name, 'event')
+
+        for field in ('event', 0):
+            self.assertEqual(gear_change.get_field(field).value, 'front_gear_change')
+            self.assertEqual(gear_change.get_field(field).raw_value, 42)
+
+        for field in ('gear_change_data', 'data', 3):
+            # verify raw numeric value
+            self.assertEqual(gear_change.get_field(field).value, gear_chance_value)
+
+        for field in ('front_gear_num', 9):
+            self.assertEqual(gear_change.get_field(field).value, 2)
+
+        for field in ('front_gear', 10):
+            self.assertEqual(gear_change.get_field(field).value, 34)
+
+        for field in ('rear_gear_num', 11):
+            self.assertEqual(gear_change.get_field(field).value, 4)
+
+        for field in ('rear_gear', 12):
+            self.assertEqual(gear_change.get_field(field).value, 20)
+
+    def test_fitparse_parsing_edge_500_fit_file(self):
+        self._fitparse_csv_test_helper(
+            'garmin-edge-500-activity.fit',
+            'garmin-edge-500-activity-records.csv')
+
+    def test_fitparse_parsing_fenix_5_bike_fit_file(self):
+        self._fitparse_csv_test_helper(
+            'garmin-fenix-5-bike.fit',
+            'garmin-fenix-5-bike-records.csv')
+
+    def test_fitparse_parsing_fenix_5_run_fit_file(self):
+        self._fitparse_csv_test_helper(
+            'garmin-fenix-5-run.fit',
+            'garmin-fenix-5-run-records.csv')
+
+    def test_fitparse_parsing_fenix_5_walk_fit_file(self):
+        self._fitparse_csv_test_helper(
+            'garmin-fenix-5-walk.fit',
+            'garmin-fenix-5-walk-records.csv')
+
+    def test_fitparse_parsing_edge_820_fit_file(self):
+        self._fitparse_csv_test_helper(
+            'garmin-edge-820-bike.fit',
+            'garmin-edge-820-bike-records.csv')
+
+    def _fitparse_csv_test_helper(self, fit_file, csv_file):
+        csv_fp = open(_test_file(csv_file), 'r')
+        csv_messages = csv.reader(csv_fp)
+        field_names = next(csv_messages)  # consume header
+
+        # parse the whole content
+        fit = tuple(fitdecode.FitReader(
+            _test_file(fit_file),
+            check_crc=True,
+            keep_raw_chunks=False))
+
+        # make a generator of 'record' messages
+        messages = (
+            r for r in fit
+            if isinstance(r, fitdecode.FitDataMessage)
+            and r.name == 'record')
+
+        # for fixups
+        last_valid_lat, last_valid_long = None, None
+
+        for message, csv_message in zip(messages, csv_messages):
+            for csv_index, field_name in enumerate(field_names):
+                try:
+                    fit_value = message.get_field(field_name).value
+                except KeyError:
+                    fit_value = None
+
+                csv_value = csv_message[csv_index]
+
+                if field_name == 'timestamp':
+                    # adjust GMT to PDT and format
+                    fit_value = (fit_value - datetime.timedelta(hours=7)).strftime("%a %b %d %H:%M:%S PDT %Y")
+
+                # track last valid lat/longs
+                if field_name == 'position_lat':
+                    if fit_value is not None:
+                        last_valid_lat = fit_value
+                if field_name == 'position_long':
+                    if fit_value is not None:
+                        last_valid_long = fit_value
+
+                # ANT FIT SDK Dump tool does a bad job of logging invalids, so fix them
+                if fit_value is None:
+                    # ANT FIT SDK Dump tool cadence reports invalid as 0
+                    if field_name == 'cadence' and csv_value == '0':
+                        csv_value = None
+                    # ANT FIT SDK Dump tool invalid lat/lng reports as last valid
+                    if field_name == 'position_lat':
+                        fit_value = last_valid_lat
+                    if field_name == 'position_long':
+                        fit_value = last_valid_long
+
+                if isinstance(fit_value, int):
+                    csv_value = int(fit_value)
+                if csv_value == '':
+                    csv_value = None
+
+                if isinstance(fit_value, float):
+                    # float comparison
+                    self.assertAlmostEqual(fit_value, float(csv_value))
+                else:
+                    self.assertEqual(
+                        fit_value, csv_value,
+                        msg="For %s, FIT value '%s' did not match CSV value '%s'" % (field_name, fit_value, csv_value))
+
+        try:
+            next(messages)
+            self.fail(".FIT file had more than csv file")
+        except StopIteration:
+            pass
+
+        try:
+            next(csv_messages)
+            self.fail(".CSV file had more messages than .FIT file")
+        except StopIteration:
+            pass
+
         csv_fp.close()
 
 
