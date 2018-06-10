@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
-# NOTE: this script comes slightly modified from python-fitparse v1.0.1
+# NOTE: this script comes from python-fitparse v1.0.1, and has been slightly
+# modified and corrected for fitdecode.
 #
 # Horrible, dirty, ugly, awful, and terrible script to export the Profile.xls
 # that comes with the FIT SDK to the Python data structures in profile.py. You

@@ -10,7 +10,9 @@ import datetime
 
 from .utils import scrub_method_name
 
-__all__ = ['FitFileDataProcessor', 'FIT_UTC_REFERENCE', 'FIT_DATETIME_MIN']
+__all__ = [
+    'FIT_UTC_REFERENCE', 'FIT_DATETIME_MIN',
+    'FitFileDataProcessor', 'StandardUnitsDataProcessor']
 
 
 #: Datetimes (uint32) represent seconds since this FIT_UTC_REFERENCE
