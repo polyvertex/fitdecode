@@ -12,15 +12,9 @@ import argparse
 from collections import OrderedDict
 import datetime
 import json
-import os.path
-import sys
 import types
 
-try:
-    import fitdecode
-except ImportError:
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-    import fitdecode
+import fitdecode
 
 
 class RecordJSONEncoder(json.JSONEncoder):
@@ -108,7 +102,7 @@ class RecordJSONEncoder(json.JSONEncoder):
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
-        description='Dump .FIT files to various formats',
+        description='Dump .FIT files to JSON',
         epilog='fitdecode version ' + fitdecode.__version__)
 
     parser.add_argument(
@@ -117,10 +111,6 @@ def parse_args(args=None):
     parser.add_argument(
         '-o', '--output', type=argparse.FileType(mode='w'), default="-",
         help='File to output data into (defaults to stdout)')
-
-    # parser.add_argument(
-    #     '-t', '--type', choices=('readable', 'json'), default='readable',
-    #     help='File type to output. (DEFAULT: %(default)s)')
 
     parser.add_argument(
         'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
