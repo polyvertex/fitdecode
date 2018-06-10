@@ -16,8 +16,8 @@ Read a FIT file, chunk by chunk:
     import fitdecode
 
     with fitdecode.FitReader(src_file) as fit:
-        for record in fit:
-            # The yielded *record* object has one of the following types:
+        for frame in fit:
+            # The yielded *frame* object is of one of the following types:
             # * fitdecode.FitHeader
             # * fitdecode.FitDefinitionMessage
             # * fitdecode.FitDataMessage

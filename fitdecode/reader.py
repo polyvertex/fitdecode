@@ -45,8 +45,8 @@ class FitReader:
         import fitdecode
 
         with fitdecode.FitReader(src_file) as fit:
-            for record in fit:
-                # The yielded *record* object has one of the following types:
+            for frame in fit:
+                # The yielded *frame* object is of one of the following types:
                 # * fitdecode.FitHeader
                 # * fitdecode.FitDefinitionMessage
                 # * fitdecode.FitDataMessage
@@ -238,7 +238,9 @@ class FitReader:
                 header_magic = self._read_struct('<2BHI4s')
         except FitEOFError as exc:
             if not exc.got:
-                return  # regular EOF
+                # regular EOF: storage is empty or previous "FIT file" ended
+                # normally
+                return
             raise FitHeaderError('file too small (' + str(exc) + ')')
 
         # check header size

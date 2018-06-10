@@ -22,6 +22,9 @@ class RecordJSONEncoder(json.JSONEncoder):
         if isinstance(obj, types.GeneratorType):
             return list(obj)
 
+        if isinstance(obj, datetime.time):
+            return obj.isoformat()
+
         if isinstance(obj, datetime.datetime):
             return obj.isoformat()
 
@@ -103,7 +106,7 @@ class RecordJSONEncoder(json.JSONEncoder):
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
-        description='Dump .FIT files to JSON',
+        description='Dump a FIT file to JSON format',
         epilog='fitdecode version ' + fitdecode.__version__)
 
     parser.add_argument(
@@ -115,11 +118,11 @@ def parse_args(args=None):
 
     parser.add_argument(
         'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
-        help='Input .FIT file (Use - for stdin)')
+        help='Input .FIT file (use - for stdin)')
 
     parser.add_argument(
         '--ignore-crc', action='store_const', const=True,
-        help='Some devices seem to write invalid crc\'s, ignore these.')
+        help="Some devices seem to write invalid CRC's, ignore these.")
 
     options = parser.parse_args(args)
 
@@ -131,12 +134,11 @@ def parse_args(args=None):
 def main(args=None):
     options = parse_args(args)
 
-    with fitdecode.FitReader(
+    frames = tuple(fitdecode.FitReader(
             options.infile,
             processor=fitdecode.StandardUnitsDataProcessor(),
             check_crc=not(options.ignore_crc),
-            keep_raw_chunks=True) as fit:
-        frames = tuple(fit)
+            keep_raw_chunks=True))
 
     json.dump(frames, fp=options.output, cls=RecordJSONEncoder)
 

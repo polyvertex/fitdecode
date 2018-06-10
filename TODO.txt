@@ -1,5 +1,4 @@
-* Unit tests
-* fitdump script (do not forget to add it to setup.py)
+* fittxt script (like fitjson but outputs free-text format for debugging)
 * Pipenv
 * pytest
 * Travis CI
