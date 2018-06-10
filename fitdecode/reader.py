@@ -81,8 +81,9 @@ class FitReader:
         self._read_size = 0    # count bytes read from this file so far in total
 
         # per-chunk state (private)
-        self._chunk_offset = 0  # the offset of the chunk that is currently being read (relative to `read_offset`)
-        self._chunk_size = 0    # the size of the chunk that is currently being read
+        self._chunk_index = 0   # the index number of the current that is currently being read
+        self._chunk_offset = 0  # the offset of the current chunk (relative to `read_offset`)
+        self._chunk_size = 0    # the size of the current chunk
 
         # per-FIT-file state (private)
         self._crc = utils.CRC_START  # current CRC value, updated upon every read, reset on each new "FIT file"
@@ -156,6 +157,7 @@ class FitReader:
         self._fd = None
         self._read_offset = 0
         self._read_size = 0
+        self._chunk_index = 0
         self._chunk_offset = 0
         self._chunk_size = 0
         self._crc = utils.CRC_START
@@ -166,11 +168,12 @@ class FitReader:
         self._accumulators = {}
         self._compressed_ts_accumulator = 0
 
-    # ONLY PRIVATE METHODS BELOW
+    # ONLY PRIVATE METHODS BELOW ***********************************************
 
     def _read_next(self):
 
         def _update_state():
+            self._chunk_index += 1
             self._chunk_offset += self._chunk_size
             self._chunk_size = 0
 
@@ -586,11 +589,13 @@ class FitReader:
         if type(chunk) in (list, tuple):
             # *chunk* is a list of chunks
             assert sum(map(lambda x: len(x), chunk)) == self._chunk_size
-            return records.FitChunk(self._chunk_offset, b''.join(chunk))
+            return records.FitChunk(
+                self._chunk_index, self._chunk_offset, b''.join(chunk))
 
         else:
             assert len(chunk) == self._chunk_size
-            return records.FitChunk(self._chunk_offset, chunk)
+            return records.FitChunk(
+                self._chunk_index, self._chunk_offset, chunk)
 
     def _add_dev_data_id(self, message):
         dev_data_index = message.get_field('developer_data_index').raw_value

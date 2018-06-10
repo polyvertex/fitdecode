@@ -27,6 +27,7 @@ class RecordJSONEncoder(json.JSONEncoder):
 
         if isinstance(obj, fitdecode.FitChunk):
             return OrderedDict((
+                ('index', obj.index),
                 ('offset', obj.offset),
                 ('size', len(obj.bytes))))
 

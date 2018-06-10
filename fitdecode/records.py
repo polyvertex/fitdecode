@@ -12,9 +12,10 @@ __all__ = [
 
 
 class FitChunk:
-    __slots__ = ('offset', 'bytes')
+    __slots__ = ('index', 'offset', 'bytes')
 
-    def __init__(self, offset, bytes):
+    def __init__(self, index, offset, bytes):
+        self.index = index
         self.offset = offset
         self.bytes = bytes
 
