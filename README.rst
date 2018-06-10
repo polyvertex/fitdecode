@@ -21,7 +21,7 @@ Read a FIT file, chunk by chunk:
             # * fitdecode.FitHeader
             # * fitdecode.FitDefinitionMessage
             # * fitdecode.FitDataMessage
-            # * fitdecode.FitCrc
+            # * fitdecode.FitCRC
             #
             # A fitdecode.FitDataMessage object contains decoded values that are
             # directly usable in your script logic.

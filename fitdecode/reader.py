@@ -50,7 +50,7 @@ class FitReader:
                 # * fitdecode.FitHeader
                 # * fitdecode.FitDefinitionMessage
                 # * fitdecode.FitDataMessage
-                # * fitdecode.FitCrc
+                # * fitdecode.FitCRC
                 #
                 # A fitdecode.FitDataMessage object contains decoded values that
                 # are directly usable in your script logic.
@@ -130,7 +130,7 @@ class FitReader:
 
         It is cleared by `close()` (or ``__exit__()``), and also each time a FIT
         file header is reached (i.e. at the beginning of a file, or after a
-        :class:`fitdecode.FitCrc`).
+        :class:`fitdecode.FitCRC`).
         """
         return self._local_mesg_defs
 
@@ -142,7 +142,7 @@ class FitReader:
 
         It is cleared by `close()` (or ``__exit__()``), and also each time a FIT
         file header is reached (i.e. at the beginning of a file, or after a
-        :class:`fitdecode.FitCrc`).
+        :class:`fitdecode.FitCRC`).
         """
         return self._dev_types
 
@@ -250,6 +250,7 @@ class FitReader:
         # read the extended part of the header (i.e. byte 12-...)
         extra_header_size = header_size - len(chunk)
         read_crc = None
+        crc_matched = None
         if extra_header_size:
             # at least 2 bytes expected for the CRC
             if extra_header_size < 2:
@@ -259,14 +260,15 @@ class FitReader:
             if len(extra_chunk) != extra_header_size:
                 raise FitHeaderError('truncated FIT header')
 
-            if self.check_crc:
-                (read_crc, ) = struct.unpack('<H', extra_chunk)
-                if not read_crc:  # can be null according to SDK
-                    read_crc = None
-                else:
-                    computed_crc = utils.compute_crc(chunk)
-                    if computed_crc != read_crc:
-                        raise FitCRCError('invalid FIT header CRC')
+            (read_crc, ) = struct.unpack('<H', extra_chunk)
+            if not read_crc:  # can be null according to SDK
+                read_crc = None
+                crc_matched = None
+            else:
+                computed_crc = utils.compute_crc(chunk)
+                crc_matched = computed_crc == read_crc
+                if self.check_crc and not crc_matched:
+                    raise FitCRCError('invalid FIT header CRC')
 
             chunk += extra_chunk
 
@@ -280,6 +282,7 @@ class FitReader:
             profile_ver=profile_ver,
             body_size=body_size,
             crc=read_crc,
+            crc_matched=crc_matched,
             chunk=self._keep_chunk(chunk))
         self._body_bytes_left = body_size
 
@@ -291,7 +294,10 @@ class FitReader:
             # print(f'{computed_crc:#x} {read_crc:#x}')
             raise FitCRCError()
 
-        return records.FitCrc(read_crc, self._keep_chunk(chunk))
+        return records.FitCRC(
+            read_crc,
+            computed_crc == read_crc,
+            self._keep_chunk(chunk))
 
     def _read_record(self):
         # read header

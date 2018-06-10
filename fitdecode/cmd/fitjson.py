@@ -67,12 +67,14 @@ class RecordJSONEncoder(json.JSONEncoder):
                 ('profile_ver', obj.profile_ver),
                 ('body_size', obj.body_size),
                 ('crc', f'{crc:#06x}'),
+                ('crc_matched', obj.crc_matched),
                 ('chunk', obj.chunk)))
 
-        if isinstance(obj, fitdecode.FitCrc):
+        if isinstance(obj, fitdecode.FitCRC):
             return OrderedDict((
                 ('frame_type', 'crc'),
                 ('crc', f'{obj.crc:#06x}'),
+                ('matched', obj.matched),
                 ('chunk', obj.chunk)))
 
         if isinstance(obj, fitdecode.FitDefinitionMessage):
@@ -110,10 +112,7 @@ def parse_args(args=None):
         epilog='fitdecode version ' + fitdecode.__version__)
 
     parser.add_argument(
-        '-v', '--verbose', action='count', default=0)
-
-    parser.add_argument(
-        '-o', '--output', type=argparse.FileType(mode='w'), default="-",
+        '-o', '--output', type=argparse.FileType(mode='w'), default='-',
         help='File to output data into (defaults to stdout)')
 
     parser.add_argument(
@@ -126,8 +125,6 @@ def parse_args(args=None):
 
     options = parser.parse_args(args)
 
-    options.verbose = options.verbose >= 1
-
     return options
 
 
@@ -135,10 +132,10 @@ def main(args=None):
     options = parse_args(args)
 
     frames = tuple(fitdecode.FitReader(
-            options.infile,
-            processor=fitdecode.StandardUnitsDataProcessor(),
-            check_crc=not(options.ignore_crc),
-            keep_raw_chunks=True))
+        options.infile,
+        processor=fitdecode.StandardUnitsDataProcessor(),
+        check_crc=not(options.ignore_crc),
+        keep_raw_chunks=True))
 
     json.dump(frames, fp=options.output, cls=RecordJSONEncoder)
 

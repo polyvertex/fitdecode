@@ -8,7 +8,7 @@
 
 
 __all__ = [
-    'FitChunk', 'FitHeader', 'FitCrc', 'FitDefinitionMessage', 'FitDataMessage']
+    'FitChunk', 'FitHeader', 'FitCRC', 'FitDefinitionMessage', 'FitDataMessage']
 
 
 class FitChunk:
@@ -23,23 +23,25 @@ class FitChunk:
 class FitHeader:
     __slots__ = (
         'header_size', 'proto_ver', 'profile_ver', 'body_size',
-        'crc', 'chunk')
+        'crc', 'crc_matched', 'chunk')
 
     def __init__(self, header_size, proto_ver, profile_ver, body_size,
-                 crc, chunk):
+                 crc, crc_matched, chunk):
         self.header_size = header_size
         self.proto_ver = proto_ver
         self.profile_ver = profile_ver
         self.body_size = body_size
         self.crc = crc  #: may be null
+        self.crc_matched = crc_matched
         self.chunk = chunk
 
 
-class FitCrc:
-    __slots__ = ('crc', 'chunk')
+class FitCRC:
+    __slots__ = ('crc', 'matched', 'chunk')
 
-    def __init__(self, crc, chunk):
+    def __init__(self, crc, matched, chunk):
         self.crc = crc
+        self.matched = matched
         self.chunk = chunk
 
 
