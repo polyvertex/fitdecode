@@ -120,8 +120,18 @@ def parse_args(args=None):
         help='Input .FIT file (use - for stdin)')
 
     parser.add_argument(
-        '--ignore-crc', action='store_const', const=True,
+        '--nocrc', action='store_const', const=True,
         help="Some devices seem to write invalid CRC's, ignore these.")
+
+    parser.add_argument(
+        '--nodef', action='store_const', const=True,
+        help="Do not output FIT so-called local message definitions.")
+
+    parser.add_argument(
+        '-f', '--filter', action='append',
+        help=(
+            'Message name(s) (or global numbers) to filter-in ' +
+            '(other messages are then ignored).'))
 
     options = parser.parse_args(args)
 
@@ -131,11 +141,26 @@ def parse_args(args=None):
 def main(args=None):
     options = parse_args(args)
 
-    frames = tuple(fitdecode.FitReader(
-        options.infile,
-        processor=fitdecode.StandardUnitsDataProcessor(),
-        check_crc=not(options.ignore_crc),
-        keep_raw_chunks=True))
+    frames = []
+    with fitdecode.FitReader(
+            options.infile,
+            processor=fitdecode.StandardUnitsDataProcessor(),
+            check_crc=not(options.nocrc),
+            keep_raw_chunks=True) as fit:
+        for frame in fit:
+            if options.nodef and isinstance(
+                    frame, fitdecode.FitDefinitionMessage):
+                continue
+
+            if (options.filter and
+                    isinstance(frame, (
+                        fitdecode.FitDefinitionMessage,
+                        fitdecode.FitDataMessage)) and
+                    (frame.name not in options.filter) and
+                    (frame.global_mesg_num not in options.filter)):
+                continue
+
+            frames.append(frame)
 
     json.dump(frames, fp=options.output, cls=RecordJSONEncoder)
 

@@ -114,6 +114,10 @@ class FitDataMessage:
         return self.def_mesg.name
 
     @property
+    def global_mesg_num(self):
+        return self.def_mesg.global_mesg_num
+
+    @property
     def mesg_type(self):
         return self.def_mesg.mesg_type
 
