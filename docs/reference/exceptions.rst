@@ -1,5 +1,5 @@
-====================
-fitdecode.exceptions
-====================
+==========
+exceptions
+==========
 
 .. automodule:: fitdecode.exceptions

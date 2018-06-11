@@ -55,15 +55,6 @@ class FitReader:
                 # A fitdecode.FitDataMessage object contains decoded values that
                 # are directly usable in your script logic.
                 pass
-
-    .. todo::
-        * Make a ``read_all()`` method to parse then interpret the file and
-          consolidate some data. Typically the post-activity ``hr`` records
-          coming from a Garmin HRM strap that are appended to the FIT file and
-          that need to be merge in activity's ``record`` messages.
-        * Since we support thread-safety, ``read_all()`` should accept
-          "progress" argument, a callable to be called each time the percentage
-          of the progression changes.
     """
 
     def __init__(self, fileish, *,
@@ -173,11 +164,12 @@ class FitReader:
     def _read_next(self):
 
         def _update_state():
-            self._chunk_index += 1
-            self._chunk_offset += self._chunk_size
-            self._chunk_size = 0
+            if self._fd:
+                self._chunk_index += 1
+                self._chunk_offset += self._chunk_size
+                self._chunk_size = 0
 
-        while True:
+        while self._fd:
             assert self._chunk_size == 0
 
             if not self._header:

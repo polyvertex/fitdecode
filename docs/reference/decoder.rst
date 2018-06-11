@@ -1,5 +1,5 @@
-=================
-fitdecode.decoder
-=================
+=======
+decoder
+=======
 
 .. automodule:: fitdecode.decoder

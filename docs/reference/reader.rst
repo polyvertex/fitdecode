@@ -1,5 +1,5 @@
-================
-fitdecode.reader
-================
+======
+reader
+======
 
 .. automodule:: fitdecode.reader

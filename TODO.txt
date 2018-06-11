@@ -1,4 +1,3 @@
-* fittxt script (like fitjson but outputs free-text format for debugging)
 * Pipenv
 * pytest
 * Travis CI

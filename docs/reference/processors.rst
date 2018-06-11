@@ -1,0 +1,5 @@
+==========
+processors
+==========
+
+.. automodule:: fitdecode.processors

@@ -7,4 +7,7 @@ Reference
 
     reference/reader
     reference/decoder
+    reference/processors
+    reference/records
+    reference/types
     reference/exceptions

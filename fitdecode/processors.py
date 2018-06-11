@@ -15,11 +15,12 @@ __all__ = [
     'FitFileDataProcessor', 'StandardUnitsDataProcessor']
 
 
-#: Datetimes (uint32) represent seconds since this FIT_UTC_REFERENCE
-#: (timestamp for UTC 00:00 Dec 31 1989)
+#: Datetimes (uint32) represent seconds since this ``FIT_UTC_REFERENCE``
+#: (unix timestamp for UTC 00:00 Dec 31 1989)
 FIT_UTC_REFERENCE = 631065600
 
-#: UNIX timestamp: Tue., July 4, 1978 9:24:16 PM
+#: ``date_time`` typed fields for which value is below ``FIT_DATETIME_MIN``
+#: represent the number of seconds elapsed since device power on.
 FIT_DATETIME_MIN = 0x10000000
 
 
@@ -29,20 +30,27 @@ class FitFileDataProcessor:
 
     Uses method cache to speed up the processing - reuse the object if used
     multiple times.
+
+    The following methods are called by :class:`fitdecode.FitReader`, in that
+    order:
+
+    * `run_type_processor`
+    * `run_field_processor`
+    * `run_unit_processor`
+    * `run_message_processor`
+
+    By default, the above methods call these methods if they exist::
+
+        def process_type_<type_name> (field_data)
+        def process_field_<field_name> (field_data)  # can be unknown_XYZ but NOT recommended
+        def process_units_<unit_name> (field_data)
+        def process_message_<mesg_name / mesg_type_num> (data_message)
+
+    ``process_*`` methods are not expected to return any value and may alter
+    the content of the passed *field_data* argument
+    (:class:`fitdecode.types.FieldData`) if needed.
+
     """
-
-    # TODO: Document API
-    # Functions that will be called to do the processing:
-    # def run_type_processor(field_data)
-    # def run_field_processor(field_data)
-    # def run_unit_processor(field_data)
-    # def run_message_processor(data_message)
-
-    # By default, the above functions call these functions if they exist:
-    # def process_type_<type_name> (field_data)
-    # def process_field_<field_name> (field_data) -- can be unknown_DD but NOT recommended
-    # def process_units_<unit_name> (field_data)
-    # def process_message_<mesg_name / mesg_type_num> (data_message)
 
     def __init__(self):
         # used to memoize scrubbed methods
@@ -110,12 +118,21 @@ class FitFileDataProcessor:
 
 
 class StandardUnitsDataProcessor(FitFileDataProcessor):
+    """
+    A `FitFileDataProcessor` that:
+
+    * Converts distances fields to ``km``
+    * Converts all ``*_speeds`` fields (by name) to ``km/h``
+    * Converts GPS coordinates (i.e. FIT's semicircles type) to ``deg``
+    """
+
     def run_field_processor(self, field_data):
         """
-        Convert all '*_speed' fields using 'process_field_speed'
+        Convert all ``*_speed`` fields using `process_field_speed`.
+
         All other units will use the default method.
         """
-        if field_data.name.endswith("_speed"):
+        if field_data.name.endswith('_speed'):
             self.process_field_speed(field_data)
         else:
             super().run_field_processor(field_data)
