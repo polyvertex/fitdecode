@@ -97,7 +97,7 @@ def txt_encode(obj):
 
     if isinstance(obj, fitdecode.FitDefinitionMessage):
         return PrintableObject(
-            _label='fit_definition [' + obj.name + ']',
+            _label=f'fit_definition - {obj.name} #{obj.local_mesg_num}({obj.global_mesg_num})',
             chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
@@ -110,12 +110,13 @@ def txt_encode(obj):
 
     if isinstance(obj, fitdecode.FitDataMessage):
         return PrintableObject(
-            _label='fit_data [' + obj.name + ']',
+            _label=f'fit_data - {obj.name} #{obj.local_mesg_num}({obj.global_mesg_num})',
             chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
                 time_offset=obj.time_offset,
                 is_developer_data=obj.is_developer_data),
+            global_mesg_num=obj.global_mesg_num,
             fields=obj.fields)
 
     if __debug__:
@@ -181,7 +182,7 @@ def global_stats(frames, options):
         _label='TXT',
         name=os.path.basename(options.infile.name),
         filter=filter_str,
-        all_frames=len(frames),
+        frames=len(frames),
         size=0,
         missing_headers=0,
         fit_files=[])
@@ -280,7 +281,7 @@ def txt_print(obj, *, indent='\t', level=0):
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
-        description='Dump a FIT file to TXT format',
+        description='Dump a FIT file to TXT format that ease debugging',
         epilog='fitdecode version ' + fitdecode.__version__)
 
     parser.add_argument(

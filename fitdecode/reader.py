@@ -19,6 +19,8 @@ from . import profile
 
 __all__ = ['FitReader']
 
+_UNSET = object()
+
 
 class RecordHeader:
     __slots__ = (
@@ -37,8 +39,8 @@ class FitReader:
     Parse the content of a FIT stream or storage.
 
     Transparently supports "chained FIT Files" as per SDK's definition. A
-    :class:`fitdecode.FitHeader` object is yielded during iteration to mark the
-    beginning of each new "FIT File".
+    `FitHeader` object is yielded during iteration to mark the beginning of each
+    new "FIT File".
 
     Usage::
 
@@ -55,16 +57,57 @@ class FitReader:
                 # A fitdecode.FitDataMessage object contains decoded values that
                 # are directly usable in your script logic.
                 pass
+
+    Data processing:
+
+    * You can specify your own data processor object using the *processor*
+      argument.
+    * The argument can also be left untouched so that the default **shared**
+      instance of `DefaultDataProcessor` is used.
+    * Otherwise, it can be set to `None` or any other false value to skip data
+      processing entirely. This can speed up things a bit if your intent is only
+      to manipulate the file at binary level (i.e. chunks), in which case
+      *keep_raw_chunks* must be set to true.
+
+    Raw chunks:
+
+    * "raw chunk" or sometimes "frame", is the name given in fitdecode to the
+      `bytes` block that represents one of the four FIT entities: `FitHeader`,
+      `FitDefinitionMessage`, `FitDataMessage` and `FitCRC`.
+    * While iterating a file with `FitReader`, you can for instance cut, stitch
+      and/or reconstruct the file being read by using the
+      `FitChunk` object attached to any of the four aforementioned entities, as
+      long as the *keep_raw_chunks* option is true.
+
+    Data bag:
+
+    * A *data_bag* object can be passed to the constructor and then be retrieved
+      via the `data_bag` property.
+    * *data_bag* can be of any type (a `dict` by default) and will never be
+      altered by this class.
+    * A "data bag" is useful if you wish to store some context-sensitive data
+      during the decoding of a file.
+    * A typical use case is from a data processor that cannot hold its own
+      context-sensitive data due to its instance being shared with other readers
+      and/or by multiple threads (typically `DefaultDataProcessor`).
+
     """
 
     def __init__(self, fileish, *,
-                 processor=None, check_crc=True, keep_raw_chunks=False):
+                 processor=_UNSET, check_crc=True, keep_raw_chunks=False,
+                 data_bag=None):
         # modifiable options (public)
         self.check_crc = check_crc
 
         # immutable options (private)
-        self._processor = processor or processors.get_default_processor()
+        self._processor = (
+            processors.get_default_processor()
+            if processor is _UNSET
+            else processor)
         self._keep_raw = keep_raw_chunks
+
+        # state (public)
+        self._data_bag = data_bag or {}
 
         # state (private)
         self._fd = None        # the file object to read from
@@ -82,8 +125,8 @@ class FitReader:
         self._body_bytes_left = 0    # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"
         self._local_mesg_defs = {}   # registry of every `FitDefinitionMessage` in this file so far
         self._dev_types = {}         # registry of developer types
+        self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"
         self._accumulators = {}
-        self._compressed_ts_accumulator = 0
 
         if hasattr(fileish, '__fspath__'):
             fileish = os.fspath(fileish)
@@ -114,6 +157,19 @@ class FitReader:
         yield from self._read_next()
 
     @property
+    def processor(self):
+        """Read-only access to the data processor object."""
+        return self._processor
+
+    @property
+    def data_bag(self):
+        """
+        Get the *data_bag* object that was passed to the constructor, or, by
+        default, a `dict` object.
+        """
+        return self._data_bag
+
+    @property
     def local_mesg_defs(self):
         """
         Read-only access to the `dict` of local message types of the current
@@ -121,7 +177,7 @@ class FitReader:
 
         It is cleared by `close()` (or ``__exit__()``), and also each time a FIT
         file header is reached (i.e. at the beginning of a file, or after a
-        :class:`fitdecode.FitCRC`).
+        `FitCRC`).
         """
         return self._local_mesg_defs
 
@@ -133,7 +189,7 @@ class FitReader:
 
         It is cleared by `close()` (or ``__exit__()``), and also each time a FIT
         file header is reached (i.e. at the beginning of a file, or after a
-        :class:`fitdecode.FitCRC`).
+        `FitCRC`).
         """
         return self._dev_types
 
@@ -156,8 +212,8 @@ class FitReader:
         self._body_bytes_left = 0
         self._local_mesg_defs = {}
         self._dev_types = {}
-        self._accumulators = {}
         self._compressed_ts_accumulator = 0
+        self._accumulators = {}
 
     # ONLY PRIVATE METHODS BELOW ***********************************************
 
@@ -222,8 +278,8 @@ class FitReader:
         self._body_bytes_left = 0
         self._local_mesg_defs = {}
         self._dev_types = {}
-        self._accumulators = {}
         self._compressed_ts_accumulator = 0
+        self._accumulators = {}
 
         try:
             chunk, header_size, proto_ver, profile_ver, body_size, \
@@ -497,10 +553,11 @@ class FitReader:
                 ts_value))                                      # raw_value
 
         # apply data processors
-        for field_data in message_fields:
-            self._processor.run_type_processor(field_data)
-            self._processor.run_field_processor(field_data)
-            self._processor.run_unit_processor(field_data)
+        if self._processor:
+            for field_data in message_fields:
+                self._processor.run_type_processor(self, field_data)
+                self._processor.run_field_processor(self, field_data)
+                self._processor.run_unit_processor(self, field_data)
 
         data_message = records.FitDataMessage(
             record_header.is_developer_data,
@@ -510,7 +567,8 @@ class FitReader:
             message_fields,
             self._keep_chunk(record_chunks))
 
-        self._processor.run_message_processor(data_message)
+        if self._processor:
+            self._processor.run_message_processor(self, data_message)
 
         return data_message
 

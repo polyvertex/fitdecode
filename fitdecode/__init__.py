@@ -23,5 +23,7 @@ from .processors import *
 from .decoder import *
 
 from . import processors
+from . import profile
+from . import reader
 from . import types
 from . import utils

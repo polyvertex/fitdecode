@@ -15,9 +15,9 @@ class FitChunk:
     __slots__ = ('index', 'offset', 'bytes')
 
     def __init__(self, index, offset, bytes):
-        self.index = index
-        self.offset = offset
-        self.bytes = bytes
+        self.index = index    #: zero-based index of this frame in the file
+        self.offset = offset  #: the offset at which this frame starts in the file
+        self.bytes = bytes    #: the frame itself as a `bytes` object
 
 
 class FitHeader:
@@ -33,7 +33,7 @@ class FitHeader:
         self.body_size = body_size
         self.crc = crc  #: may be null
         self.crc_matched = crc_matched
-        self.chunk = chunk
+        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
 
 
 class FitCRC:
@@ -42,7 +42,7 @@ class FitCRC:
     def __init__(self, crc, matched, chunk):
         self.crc = crc
         self.matched = matched
-        self.chunk = chunk
+        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
 
 
 class FitDefinitionMessage:
@@ -72,7 +72,7 @@ class FitDefinitionMessage:
         self.endian = endian
         self.field_defs = field_defs
         self.dev_field_defs = dev_field_defs
-        self.chunk = chunk
+        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
 
     @property
     def name(self):
@@ -100,7 +100,7 @@ class FitDataMessage:
         self.time_offset = time_offset
         self.def_mesg = def_mesg  #: `FitDefinitionMessage`
         self.fields = fields
-        self.chunk = chunk
+        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
 
     def __iter__(self):
         # sort by whether this is a known field, then its name
