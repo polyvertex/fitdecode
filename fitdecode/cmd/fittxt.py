@@ -21,7 +21,8 @@ echo = None
 
 def txt_encode(obj):
     """
-    Convert a given *obj* to either a *str* or *PrintableObject* (most suitable)
+    Convert a given *obj* to either a *str* or *PrintableObject* depending on
+    which is the most suitable
     """
 
     if isinstance(obj, PrintableObject):
@@ -97,6 +98,7 @@ def txt_encode(obj):
     if isinstance(obj, fitdecode.FitDefinitionMessage):
         return PrintableObject(
             _label='fit_definition [' + obj.name + ']',
+            chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
                 time_offset=obj.time_offset,
@@ -104,18 +106,17 @@ def txt_encode(obj):
             global_mesg_num=obj.global_mesg_num,
             endian=obj.endian,
             field_defs=obj.field_defs,
-            dev_field_defs=obj.dev_field_defs,
-            chunk=obj.chunk)
+            dev_field_defs=obj.dev_field_defs)
 
     if isinstance(obj, fitdecode.FitDataMessage):
         return PrintableObject(
             _label='fit_data [' + obj.name + ']',
+            chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
                 time_offset=obj.time_offset,
                 is_developer_data=obj.is_developer_data),
-            fields=obj.fields,
-            chunk=obj.chunk)
+            fields=obj.fields)
 
     if __debug__:
         print(type(obj))
@@ -140,6 +141,7 @@ class PrintableObject:
 
         for key, value in props.items():
             # to avoid potential collision with PrintableObject members
+            # (see __setattr__)
             assert key[0] != '_'
 
             self._dict[key] = value
@@ -185,8 +187,8 @@ def global_stats(frames, options):
         if isinstance(frame, fitdecode.FitHeader):
             stats_got_header = True
             stats.fit_files.append(PrintableObject(
-                data_messages=0,
                 definition_messages=0,
+                data_messages=0,
                 has_footer=False,
                 header_crc_matched=frame.crc_matched,
                 footer_crc_matched=False))
@@ -212,7 +214,7 @@ def global_stats(frames, options):
     return stats
 
 
-def txt_print(obj, *, indent=' ' * 4, level=0):
+def txt_print(obj, *, indent='\t', level=0):
 
     def _recurse(subobj, sublevel=level):
         txt_print(subobj, indent=indent, level=sublevel)
@@ -224,13 +226,24 @@ def txt_print(obj, *, indent=' ' * 4, level=0):
         _p(obj)
 
     elif isinstance(obj, (tuple, list)):
-        first = True
+        # first pass to check if we can keep this list on a single line
+        one_line = True
         for value in obj:
-            if first:
-                first = False
-            else:
-                _p('-')
-            _recurse(value)
+            if value is not None and not isinstance(
+                    value, (bool, int, float, decimal.Decimal)):
+                one_line = False
+                break
+
+        if one_line:
+            _p('[' + ', '.join([txt_encode(v) for v in obj]) + ']')
+        else:
+            first = True
+            for value in obj:
+                if first:
+                    first = False
+                else:
+                    _p('-')
+                _recurse(value)
 
     elif isinstance(obj, PrintableObject):
         if obj._label:
