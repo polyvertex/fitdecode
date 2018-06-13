@@ -1,3 +1,5 @@
+* handle event_timestamp_12 in "hr" messages
+
 * Pipenv
 * pytest
 * Travis CI

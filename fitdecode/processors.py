@@ -16,7 +16,7 @@ __all__ = [
 
 
 #: Datetimes (uint32) represent seconds since this ``FIT_UTC_REFERENCE``
-#: (unix timestamp for UTC 00:00 Dec 31 1989)
+#: (unix timestamp for UTC 00:00 Dec 31 1989).
 FIT_UTC_REFERENCE = 631065600
 
 #: ``date_time`` typed fields for which value is below ``FIT_DATETIME_MIN``
@@ -28,18 +28,36 @@ class DefaultDataProcessor:
     """
     Processor to change raw values to more comfortable ones.
 
-    Uses method cache to speed up the processing - reuse the object if used
-    multiple times.
+    This is the default data processor used by :class:`fitdecode.FitReader` if
+    you do not specify any.
 
-    The following methods are called by :class:`fitdecode.FitReader`, in that
-    order:
+    It uses method cache to speed up the processing. For that reason, it is best
+    to call `get_default_processor` to get a reference to a shared instance
+    instead of manually instantiate it. As :class:`fitdecode.FitReader` does by
+    default.
 
-    * `run_type_processor`
-    * `run_field_processor`
-    * `run_unit_processor`
-    * `run_message_processor`
+    The following methods are called by :class:`fitdecode.FitReader`:
 
-    By default, the above methods call these methods if they exist::
+    * `on_header`, each time a :class:`fitdecode.FitHeader` is reached
+    * `on_crc`, each time a :class:`fitdecode.FitCRC` (the FIT footer) is
+      reached
+
+    This is convenient if you wish to reset some context-sensitive state in-
+    between two chained FIT files for example.
+
+    Bear in mind that a malformed/corrupted file may miss either of these
+    entities (header and/or CRC footer).
+
+    Also, the following methods are called for each field of every data message,
+    in that order:
+
+    * `on_type_processor`
+    * `on_field_processor`
+    * `on_unit_processor`
+    * `on_message_processor`
+
+    By default, the above processor methods call the following methods if they
+    exist (hence the aforementioned caching)::
 
         def process_type_<type_name>(reader, field_data)
         def process_field_<field_name>(reader, field_data)  # can be unknown_XYZ but NOT recommended
@@ -57,35 +75,48 @@ class DefaultDataProcessor:
         # used to memoize scrubbed methods
         self._method_cache = {}
 
-    def on_header(self, reader, header):
+    def on_header(self, reader, fit_header):
         pass
 
-    def run_type_processor(self, reader, field_data):
+    def on_crc(self, reader, fit_crc):
+        pass
+
+    def on_type_processor(self, reader, field_data):
         self._run_processor(
             'process_type_' + field_data.type.name,
             reader, field_data)
 
-    def run_field_processor(self, reader, field_data):
+    def on_field_processor(self, reader, field_data):
         self._run_processor(
             'process_field_' + field_data.name,
             reader, field_data)
 
-    def run_unit_processor(self, reader, field_data):
+    def on_unit_processor(self, reader, field_data):
         if field_data.units:
             self._run_processor(
                 'process_units_' + field_data.units,
                 reader, field_data)
 
-    def run_message_processor(self, reader, data_message):
+    def on_message_processor(self, reader, data_message):
         self._run_processor(
             'process_message_' + data_message.def_mesg.name,
             reader, data_message)
 
     def process_type_bool(self, reader, field_data):
+        """Just `bool()` any ``bool`` typed FIT field unless value is `None`"""
         if field_data.value is not None:
             field_data.value = bool(field_data.value)
 
     def process_type_date_time(self, reader, field_data):
+        """
+        Convert ``date_time`` typed field values into `datetime.datetime` object
+        if possible.
+
+        That is, if value is not `None` and greater or equal than
+        `FIT_DATETIME_MIN`.
+
+        The resulting `datetime.datetime` object is timezone-aware (UTC).
+        """
         if (field_data.value is not None and
                 field_data.value >= FIT_DATETIME_MIN):
             field_data.value = datetime.datetime.fromtimestamp(
@@ -94,6 +125,13 @@ class DefaultDataProcessor:
             field_data.units = None  # units were 's', set to None
 
     def process_type_local_date_time(self, reader, field_data):
+        """
+        Convert ``date_time`` typed field values into `datetime.datetime` object
+        unless value is `None`.
+
+        The resulting `datetime.datetime` object **IS NOT** timezone-aware, but
+        this method assumes UTC at object construction to ensure consistency.
+        """
         if field_data.value is not None:
             # This value was created on the device using its local timezone.
             # Unless we know that timezone, this value won't be correct.
@@ -103,6 +141,10 @@ class DefaultDataProcessor:
             field_data.units = None
 
     def process_type_localtime_into_day(self, reader, field_data):
+        """
+        Convert ``localtime_into_day`` typed field values into `datetime.time`
+        object unless value is `None`.
+        """
         if field_data.value is not None:
             m, s = divmod(field_data.value, 60)
             h, m = divmod(m, 60)
@@ -110,12 +152,13 @@ class DefaultDataProcessor:
             field_data.units = None
 
     def _run_processor(self, method_name, reader, data):
-        method = self._get_scrubbed_method(method_name)
+        method = self._get_method(method_name)
         if method is None:
             return
+
         method(reader, data)
 
-    def _get_scrubbed_method(self, method_name):
+    def _get_method(self, method_name):
         method = self._method_cache.get(method_name, False)
         if method is not False:
             return method
@@ -132,14 +175,16 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
     """
     A `DefaultDataProcessor` that also:
 
-    * Converts distances fields to ``km``
-    * Converts all ``*_speeds`` fields (by name) to ``km/h``
+    * Converts ``distance`` and ``total_distance`` fields to ``km`` (in ``m`` by
+      default)
+    * Converts all ``*_speeds`` fields (by name) to ``km/h`` (in ``m/s`` by
+      default)
     * Converts GPS coordinates (i.e. FIT's semicircles type) to ``deg``
 
     .. seealso:: `DefaultDataProcessor`
     """
 
-    def run_field_processor(self, reader, field_data):
+    def on_field_processor(self, reader, field_data):
         """
         Convert all ``*_speed`` fields using `process_field_speed`.
 
@@ -154,6 +199,9 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
         if field_data.value is not None:
             field_data.value /= 1000.0
         field_data.units = 'km'
+
+    def process_field_total_distance(self, reader, field_data):
+        self.process_field_distance(reader, field_data)
 
     def process_field_speed(self, reader, field_data):
         if field_data.value is not None:
@@ -170,5 +218,5 @@ _DEFAULT_PROCESSOR = DefaultDataProcessor()
 
 
 def get_default_processor():
-    """Default, **shared** instance of processor (due to the method cache)"""
+    """Get a **shared** instance of `DefaultDataProcessor`"""
     return _DEFAULT_PROCESSOR

@@ -99,15 +99,17 @@ class FitReader:
         # modifiable options (public)
         self.check_crc = check_crc
 
+        # state (public)
+        #: the *data_bag* object that was passed to the constructor, or, by
+        #: default, a `dict` object
+        self.data_bag = data_bag or {}
+
         # immutable options (private)
         self._processor = (
             processors.get_default_processor()
             if processor is _UNSET
             else processor)
         self._keep_raw = keep_raw_chunks
-
-        # state (public)
-        self._data_bag = data_bag or {}
 
         # state (private)
         self._fd = None        # the file object to read from
@@ -122,6 +124,7 @@ class FitReader:
         # per-FIT-file state (private)
         self._crc = utils.CRC_START  # current CRC value, updated upon every read, reset on each new "FIT file"
         self._header = None          # `FitHeader` of the **current** "FIT file"
+        self._file_id = None         # last read file_id `FitDataMessage` object
         self._body_bytes_left = 0    # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"
         self._local_mesg_defs = {}   # registry of every `FitDefinitionMessage` in this file so far
         self._dev_types = {}         # registry of developer types
@@ -162,12 +165,18 @@ class FitReader:
         return self._processor
 
     @property
-    def data_bag(self):
+    def last_header(self):
+        """The last read `FitHeader` object. May be `None`."""
+        return self._header
+
+    @property
+    def file_id(self):
         """
-        Get the *data_bag* object that was passed to the constructor, or, by
-        default, a `dict` object.
+        The last read ``file_id`` `FitDataMessage` object. May be `None`.
+
+        .. seealso:: `file_id_def`
         """
-        return self._data_bag
+        return self._file_id
 
     @property
     def local_mesg_defs(self):
@@ -209,6 +218,7 @@ class FitReader:
         self._chunk_size = 0
         self._crc = utils.CRC_START
         self._header = None
+        self._file_id = None
         self._body_bytes_left = 0
         self._local_mesg_defs = {}
         self._dev_types = {}
@@ -555,9 +565,9 @@ class FitReader:
         # apply data processors
         if self._processor:
             for field_data in message_fields:
-                self._processor.run_type_processor(self, field_data)
-                self._processor.run_field_processor(self, field_data)
-                self._processor.run_unit_processor(self, field_data)
+                self._processor.on_type_processor(self, field_data)
+                self._processor.on_field_processor(self, field_data)
+                self._processor.on_unit_processor(self, field_data)
 
         data_message = records.FitDataMessage(
             record_header.is_developer_data,
@@ -568,7 +578,11 @@ class FitReader:
             self._keep_chunk(record_chunks))
 
         if self._processor:
-            self._processor.run_message_processor(self, data_message)
+            self._processor.on_message_processor(self, data_message)
+
+        # keep record of the last file_id message
+        if def_mesg.global_mesg_num == 0:
+            self._file_id = data_message
 
         return data_message
 
