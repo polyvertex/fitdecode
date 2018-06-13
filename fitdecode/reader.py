@@ -127,7 +127,7 @@ class FitReader:
         self._file_id = None         # last read file_id `FitDataMessage` object
         self._body_bytes_left = 0    # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"
         self._local_mesg_defs = {}   # registry of every `FitDefinitionMessage` in this file so far
-        self._dev_types = {}         # registry of developer types
+        self._local_dev_types = {}         # registry of developer types
         self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"
         self._accumulators = {}
 
@@ -191,7 +191,7 @@ class FitReader:
         return self._local_mesg_defs
 
     @property
-    def dev_types(self):
+    def local_dev_types(self):
         """
         Read-only access to the `dict` of developer types of the current
         "FIT file".
@@ -200,7 +200,7 @@ class FitReader:
         file header is reached (i.e. at the beginning of a file, or after a
         `FitCRC`).
         """
-        return self._dev_types
+        return self._local_dev_types
 
     def close(self):
         """
@@ -221,7 +221,7 @@ class FitReader:
         self._file_id = None
         self._body_bytes_left = 0
         self._local_mesg_defs = {}
-        self._dev_types = {}
+        self._local_dev_types = {}
         self._compressed_ts_accumulator = 0
         self._accumulators = {}
 
@@ -287,7 +287,7 @@ class FitReader:
         self._header = None
         self._body_bytes_left = 0
         self._local_mesg_defs = {}
-        self._dev_types = {}
+        self._local_dev_types = {}
         self._compressed_ts_accumulator = 0
         self._accumulators = {}
 
@@ -678,14 +678,14 @@ class FitReader:
             application_id = None
 
         # declare/overwrite type
-        self._dev_types[dev_data_index] = {
+        self._local_dev_types[dev_data_index] = {
             'dev_data_index': dev_data_index,
             'application_id': application_id,
             'fields': {}}
 
     def _add_dev_field_description(self, message):
         dev_data_index = message.get_field('developer_data_index').raw_value
-        if dev_data_index not in self._dev_types:
+        if dev_data_index not in self._local_dev_types:
             raise FitParseError(
                 self._chunk_offset,
                 'dev_data_index {dev_data_index} not defined')
@@ -701,7 +701,7 @@ class FitReader:
         except KeyError:
             native_field_num = None
 
-        fields = self._dev_types[int(dev_data_index)]['fields']
+        fields = self._local_dev_types[int(dev_data_index)]['fields']
 
         # declare/overwrite type
         fields[field_def_num] = types.DevField(
@@ -709,14 +709,14 @@ class FitReader:
             types.BASE_TYPES[base_type_id], units, native_field_num)
 
     def _get_dev_type(self, dev_data_index, field_def_num):
-        if dev_data_index not in self._dev_types:
+        if dev_data_index not in self._local_dev_types:
             raise FitParseError(
                 self._chunk_offset,
                 f'dev_data_index {dev_data_index} not defined ' +
                 f'(looking up for field {field_def_num})')
 
         try:
-            return self._dev_types[dev_data_index]['fields'][field_def_num]
+            return self._local_dev_types[dev_data_index]['fields'][field_def_num]
         except AttributeError:
             raise FitParseError(
                 self._chunk_offset,
