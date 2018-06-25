@@ -224,7 +224,7 @@ class DevFieldDefinition:
         return self.field.type
 
 
-class FieldData(object):
+class FieldData:
     __slots__ = (
         'field_def', 'field', 'parent_field', 'value', 'raw_value', 'units')
 

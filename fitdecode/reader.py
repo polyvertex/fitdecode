@@ -127,7 +127,7 @@ class FitReader:
         self._file_id = None         # last read file_id `FitDataMessage` object
         self._body_bytes_left = 0    # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"
         self._local_mesg_defs = {}   # registry of every `FitDefinitionMessage` in this file so far
-        self._local_dev_types = {}         # registry of developer types
+        self._local_dev_types = {}   # registry of developer types
         self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"
         self._accumulators = {}
 
@@ -344,6 +344,9 @@ class FitReader:
             chunk=self._keep_chunk(chunk))
         self._body_bytes_left = body_size
 
+        if self._processor:
+            self._processor.on_header(self, self._header)
+
     def _read_crc(self):
         computed_crc = self._crc
         chunk, read_crc = self._read_struct('<H')
@@ -352,10 +355,15 @@ class FitReader:
             # print(f'{computed_crc:#x} {read_crc:#x}')
             raise FitCRCError()
 
-        return records.FitCRC(
+        crc_obj = records.FitCRC(
             read_crc,
             computed_crc == read_crc,
             self._keep_chunk(chunk))
+
+        if self._processor:
+            self._processor.on_crc(self, crc_obj)
+
+        return crc_obj
 
     def _read_record(self):
         # read header

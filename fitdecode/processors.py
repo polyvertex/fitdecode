@@ -48,8 +48,9 @@ class DefaultDataProcessor:
     Bear in mind that a malformed/corrupted file may miss either of these
     entities (header and/or CRC footer).
 
-    Also, the following methods are called for each field of every data message,
-    in that order:
+    Also, the following methods are called (still by
+    :class:`fitdecode.FitReader`) for each field of every data message, in that
+    order:
 
     * `on_type_processor`
     * `on_field_processor`
@@ -193,7 +194,7 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
         if field_data.name.endswith('_speed'):
             self.process_field_speed(reader, field_data)
         else:
-            super().run_field_processor(reader, field_data)
+            super().on_field_processor(reader, field_data)
 
     def process_field_distance(self, reader, field_data):
         if field_data.value is not None:
