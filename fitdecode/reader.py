@@ -507,7 +507,10 @@ class FitReader:
                 if field.components:
                     for component in field.components:
                         # render its raw value
-                        cmp_raw_value = component.render(raw_value)
+                        try:
+                            cmp_raw_value = component.render(raw_value)
+                        except ValueError:
+                            continue
 
                         # apply accumulated value
                         if component.accumulate and cmp_raw_value is not None:

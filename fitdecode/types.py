@@ -158,6 +158,14 @@ class ComponentField:
         # if it's a tuple, then it's a byte array and unpack it as such
         # (only type that uses this is compressed speed/distance)
         if isinstance(raw_value, tuple):
+            # Profile.xlsx sometimes contains more components than the read raw
+            # value is able to hold (typically the *event_timestamp_12* field in
+            # *hr* messages).
+            # This test allows to ensure *unpacked_num* is not right-shifted
+            # more than possible.
+            if self.bit_offset and self.bit_offset >= len(raw_value) << 3:
+                raise ValueError()
+
             unpacked_num = 0
 
             # unpack byte array as little endian
