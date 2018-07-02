@@ -29,7 +29,7 @@
 
             "windows":
             {
-                "cmd": ["tools\\python.cmd", "-m", "flake8", "$file"]
+                "cmd": ["tools\\py.cmd", "-m", "flake8", "$file"]
             }
         },
 
@@ -49,7 +49,7 @@
 
             "windows":
             {
-                "cmd": ["tools\\python.cmd", "-m", "flake8"]
+                "cmd": ["tools\\py.cmd", "-m", "flake8"]
             }
         }
     ]

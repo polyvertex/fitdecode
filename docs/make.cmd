@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
-if #%PYTHONCALL%#==## set PYTHONCALL=call "%~dp0..\tools\python.cmd"
+if #%PYTHONCALL%#==## set PYTHONCALL=call "%~dp0..\tools\py.cmd"
 if #%SPHINXBUILD%#==## set SPHINXBUILD=%PYTHONCALL% -m sphinx
 
 set BUILD_DIR=%~dp0_build
