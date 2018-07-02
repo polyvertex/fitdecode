@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # NOTE: this script comes from python-fitparse v1.0.1, and has been slightly
-# modified and corrected for fitdecode.
+# modified and corrected to fit fitdecode's needs.
 #
 # Horrible, dirty, ugly, awful, and terrible script to export the Profile.xls
 # that comes with the FIT SDK to the Python data structures in profile.py. You
@@ -43,7 +43,13 @@ IMPORT_HEADER = '''from .types import (
     SubField,
     BASE_TYPES)'''
 
-SPECIAL_FIELD_DECLARTIONS = "FIELD_TYPE_TIMESTAMP = Field(name='timestamp', type=FIELD_TYPES['date_time'], def_num=253, units='s')"
+# This allows to prepend the declaration of some message numbers to the
+# generated file.
+# E.g.: 'hr' -> MESG_NUM_HR = 132
+# CAUTION: no declaration will be inserted for a non-existing message
+MESSAGE_NUM_DECLARATIONS = ('hr', )
+
+SPECIAL_FIELD_DECLARATIONS = "FIELD_TYPE_TIMESTAMP = Field(name='timestamp', type=FIELD_TYPES['date_time'], def_num=253, units='s')"
 
 IGNORE_TYPE_VALUES = (
     # of the form 'type_name:value_name'
@@ -154,6 +160,13 @@ class MessageList(namedtuple('MessageList', ('messages'))):
             s += "    %s: %s,\n" % (message.num, indent(message))
         s += '}'
         return s
+
+    def get_by_name(self, mesg_name):
+        for mesg in self.messages:
+            if mesg.name == mesg_name:
+                return mesg
+
+        raise ValueError('mesg_name')
 
 
 class MessageInfo(namedtuple('MessageInfo', ('name', 'num', 'group_name', 'fields', 'comment'))):
@@ -522,6 +535,14 @@ def main(input_xls_or_zip, output_py_path=None):
     type_list = parse_types(types_rows)
     message_list = parse_messages(messages_rows, type_list)
 
+    mesg_num_declarations = []
+    for mesg_name in MESSAGE_NUM_DECLARATIONS:
+        mesg_info = message_list.get_by_name(mesg_name)
+        mesg_decl = 'MESG_NUM_%s = %s' % (
+            mesg_name.upper(),
+            str(mesg_info.num) if mesg_info else 'None')
+        mesg_num_declarations.append(mesg_decl)
+
     output = '\n'.join([
         "\n%s" % PROFILE_HEADER_FIRST_PART,
         header('EXPORTED PROFILE FROM %s ON %s' % (
@@ -533,8 +554,9 @@ def main(input_xls_or_zip, output_py_path=None):
             len(message_list.messages), sum(len(mi.fields) for mi in message_list.messages),
         )),
         '', IMPORT_HEADER, '\n',
+        '\n'.join(mesg_num_declarations), '\n',
         str(type_list), '\n',
-        SPECIAL_FIELD_DECLARTIONS, '\n',
+        SPECIAL_FIELD_DECLARATIONS, '\n',
         str(message_list), ''
     ])
 
@@ -552,7 +574,7 @@ def main(input_xls_or_zip, output_py_path=None):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: %s <FitSDK.zip | Profile.xls> [profile.py]", os.path.basename(__file__))
+        print("Usage: %s <FitSDK.zip | Profile.xls> [profile.py]" % os.path.basename(__file__))
         sys.exit(0)
 
     xls = sys.argv[1]
