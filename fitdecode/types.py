@@ -282,6 +282,13 @@ class FieldData:
     def field_type(self):
         return self.field.field_type if self.field else 'field'
 
+    @property
+    def is_expanded(self):
+        """
+        Flag to indicate whether this field has been generated through expansion
+        """
+        return not self.field_def
+
     def is_named(self, name):
         if self.field:
             if name in (self.field.name, self.field.def_num):

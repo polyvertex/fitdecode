@@ -62,8 +62,7 @@ class FitReader:
 
     * You can specify your own data processor object using the *processor*
       argument.
-    * The argument can also be left untouched so that the default **shared**
-      instance of `DefaultDataProcessor` is used.
+    * The argument can be left untouched so that `DefaultDataProcessor` is used.
     * Otherwise, it can be set to `None` or any other false value to skip data
       processing entirely. This can speed up things a bit if your intent is only
       to manipulate the file at binary level (i.e. chunks), in which case
@@ -106,7 +105,7 @@ class FitReader:
 
         # immutable options (private)
         self._processor = (
-            processors.get_default_processor()
+            processors.DefaultDataProcessor()
             if processor is _UNSET
             else processor)
         self._keep_raw = keep_raw_chunks
@@ -591,7 +590,7 @@ class FitReader:
         if self._processor:
             self._processor.on_message_processor(self, data_message)
 
-        # keep record of the last file_id message
+        # keep track of the last file_id message
         if def_mesg.global_mesg_num == 0:
             self._file_id = data_message
 
@@ -667,9 +666,9 @@ class FitReader:
             return None
 
         assert chunk
-        assert type(chunk) in (list, tuple, bytes)
+        assert isinstance(chunk, (list, tuple, bytes))
 
-        if type(chunk) in (list, tuple):
+        if isinstance(chunk, (list, tuple)):
             # *chunk* is a list of chunks
             assert sum(map(lambda x: len(x), chunk)) == self._chunk_size
             return records.FitChunk(

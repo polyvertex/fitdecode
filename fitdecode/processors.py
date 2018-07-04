@@ -31,11 +31,6 @@ class DefaultDataProcessor:
     This is the default data processor used by :class:`fitdecode.FitReader` if
     you do not specify any.
 
-    It uses method cache to speed up the processing. For that reason, it is best
-    to call `get_default_processor` to get a reference to a shared instance
-    instead of manually instantiate it. As :class:`fitdecode.FitReader` does by
-    default.
-
     The following methods are called by :class:`fitdecode.FitReader`:
 
     * `on_header`, each time a :class:`fitdecode.FitHeader` is reached
@@ -73,7 +68,6 @@ class DefaultDataProcessor:
     """
 
     def __init__(self):
-        # used to memoize scrubbed methods
         self._method_cache = {}
 
     def on_header(self, reader, fit_header):
@@ -213,11 +207,3 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
         if field_data.value is not None:
             field_data.value *= 180.0 / (2 ** 31)
         field_data.units = 'deg'
-
-
-_DEFAULT_PROCESSOR = DefaultDataProcessor()
-
-
-def get_default_processor():
-    """Get a **shared** instance of `DefaultDataProcessor`"""
-    return _DEFAULT_PROCESSOR
