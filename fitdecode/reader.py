@@ -575,9 +575,9 @@ class FitReader:
         # apply data processors
         if self._processor:
             for field_data in message_fields:
-                self._processor.on_type_processor(self, field_data)
-                self._processor.on_field_processor(self, field_data)
-                self._processor.on_unit_processor(self, field_data)
+                self._processor.on_process_type(self, field_data)
+                self._processor.on_process_field(self, field_data)
+                self._processor.on_process_unit(self, field_data)
 
         data_message = records.FitDataMessage(
             record_header.is_developer_data,
@@ -588,7 +588,7 @@ class FitReader:
             self._keep_chunk(record_chunks))
 
         if self._processor:
-            self._processor.on_message_processor(self, data_message)
+            self._processor.on_process_message(self, data_message)
 
         # keep track of the last file_id message
         if def_mesg.global_mesg_num == 0:

@@ -47,10 +47,10 @@ class DefaultDataProcessor:
     :class:`fitdecode.FitReader`) for each field of every data message, in that
     order:
 
-    * `on_type_processor`
-    * `on_field_processor`
-    * `on_unit_processor`
-    * `on_message_processor`
+    * `on_process_type`
+    * `on_process_field`
+    * `on_process_unit`
+    * `on_process_message`
 
     By default, the above processor methods call the following methods if they
     exist (hence the aforementioned caching)::
@@ -61,7 +61,7 @@ class DefaultDataProcessor:
         def process_message_<mesg_name|mesg_type_num>(reader, data_message)
 
     ``process_*`` methods are not expected to return any value and may alter
-    the content of the passed *field_data* argument
+    the content of the passed *field_data* and *data_message* arguments
     (:class:`fitdecode.types.FieldData`) if needed.
 
     .. seealso:: `StandardUnitsDataProcessor`
@@ -76,23 +76,23 @@ class DefaultDataProcessor:
     def on_crc(self, reader, fit_crc):
         pass
 
-    def on_type_processor(self, reader, field_data):
+    def on_process_type(self, reader, field_data):
         self._run_processor(
             'process_type_' + field_data.type.name,
             reader, field_data)
 
-    def on_field_processor(self, reader, field_data):
+    def on_process_field(self, reader, field_data):
         self._run_processor(
             'process_field_' + field_data.name,
             reader, field_data)
 
-    def on_unit_processor(self, reader, field_data):
+    def on_process_unit(self, reader, field_data):
         if field_data.units:
             self._run_processor(
                 'process_units_' + field_data.units,
                 reader, field_data)
 
-    def on_message_processor(self, reader, data_message):
+    def on_process_message(self, reader, data_message):
         self._run_processor(
             'process_message_' + data_message.def_mesg.name,
             reader, data_message)
@@ -179,7 +179,7 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
     .. seealso:: `DefaultDataProcessor`
     """
 
-    def on_field_processor(self, reader, field_data):
+    def on_process_field(self, reader, field_data):
         """
         Convert all ``*_speed`` fields using `process_field_speed`.
 
@@ -188,7 +188,7 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
         if field_data.name.endswith('_speed'):
             self.process_field_speed(reader, field_data)
         else:
-            super().on_field_processor(reader, field_data)
+            super().on_process_field(reader, field_data)
 
     def process_field_distance(self, reader, field_data):
         if field_data.value is not None:
