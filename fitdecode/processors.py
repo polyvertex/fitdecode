@@ -98,7 +98,7 @@ class DefaultDataProcessor:
             reader, data_message)
 
     def process_type_bool(self, reader, field_data):
-        """Just `bool()` any ``bool`` typed FIT field unless value is `None`"""
+        """Just `bool` any ``bool`` typed FIT field unless value is `None`"""
         if field_data.value is not None:
             field_data.value = bool(field_data.value)
 

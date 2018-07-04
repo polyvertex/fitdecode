@@ -31,7 +31,7 @@ Read a FIT file, chunk by chunk:
 Installation
 ============
 
-fitdecode is available on `PyPI <https://pypi.org/project/fitdecode/>`_::
+**TODO:** fitdecode is available on `PyPI <https://pypi.org/project/fitdecode/>`_::
 
     $ pip install fitdecode
 
@@ -59,8 +59,7 @@ Main differences between fitdecode and fitparse:
 * fitdecode is thread-safe in the sense that it does not perform write access
   to any global variable, and that the objects keep their state storage locally
 
-* fitdecode highest level interfaces, FitReader and FitDecoder, are not
-  compatible with fitparse's FitFile
+* fitdecode high-level interfaces are not compatible with fitparse's FitFile
 
 * fitdecode does not discard the FIT header and the CRC footer while iterating
   a file, which allow to get a complete 1:1 representation of the file that is
@@ -73,7 +72,8 @@ Main differences between fitdecode and fitparse:
   binary form, to allow FIT file cutting, stitching and filtering at binary
   level
 
-* fitdecode offers a higher level of abstraction (``decoder.py`` module) to
+* **TODO:**
+  fitdecode offers a higher level of abstraction (``decoder.py`` module) to
   allow data processing and consolidation at file level.
 
   One typical use case example is the ``hr`` messages that are appended by
@@ -90,7 +90,7 @@ Why a new library?
 
 It has been decided to create a new library instead of just offering to patch
 fitparse_ because many changes and adds in fitdecode break fitparse's backward
-compatibilty and because it allowed more liberty during the development of
+compatibilty and because it allowed more freedom during the development of
 fitdecode.
 
 

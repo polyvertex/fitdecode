@@ -170,11 +170,7 @@ class FitReader:
 
     @property
     def file_id(self):
-        """
-        The last read ``file_id`` `FitDataMessage` object. May be `None`.
-
-        .. seealso:: `file_id_def`
-        """
+        """The last read ``file_id`` `FitDataMessage` object. May be `None`."""
         return self._file_id
 
     @property

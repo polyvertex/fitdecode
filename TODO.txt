@@ -1,10 +1,25 @@
-* handle event_timestamp_12 in "hr" messages
+* Handle event_timestamp_12 in 'hr' messages
 
-* Pipenv
-* pytest
-* Travis CI
-* AppVeyor CI
-* .gitlab-ci.yml
-* Coverage.py???
-* Check for PyPy compliance once it's compatible with 3.6+ (3.5 only atm)
+* FitDecoder
+  * Create a dedicated 'decoder.py' module
+  * Use FitReader to read all frames at once in order to store and structure
+    them internally
+  * FIT files should be stored separately
+    * with easy access to 'header', 'crc' and 'file_id' frames
+    * as well as other useful properties (?)
+  * Proper handling of 'hr' messages in 'activity' files, by inserting hr data
+    into 'record' messages and removing the 'hr' messages (eventually erasing
+    empty FIT files; see cleanup() method below)
+  * cleanup() method(s)
+    * To remove unused message definitions
+    * To remove empty FIT files (i.e. no data message)
+
+* Project and CI
+  * Pipenv
+  * Travis CI
+  * AppVeyor CI
+  * .gitlab-ci.yml
+  * Coverage.py???
+  * Check for PyPy compliance once it's compatible with 3.6+ (3.5 only atm)
+
 * Improve docs

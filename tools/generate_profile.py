@@ -47,7 +47,9 @@ IMPORT_HEADER = '''from .types import (
 # generated file.
 # E.g.: 'hr' -> MESG_NUM_HR = 132
 # CAUTION: no declaration will be inserted for a non-existing message
-MESSAGE_NUM_DECLARATIONS = ('hr', )
+# Example:
+#   MESSAGE_NUM_DECLARATIONS = ('hr', )
+MESSAGE_NUM_DECLARATIONS = ()
 
 SPECIAL_FIELD_DECLARATIONS = "FIELD_TYPE_TIMESTAMP = Field(name='timestamp', type=FIELD_TYPES['date_time'], def_num=253, units='s')"
 
@@ -553,8 +555,8 @@ def main(input_xls_or_zip, output_py_path=None):
             len(type_list.types), sum(len(ti.enum) for ti in type_list.types),
             len(message_list.messages), sum(len(mi.fields) for mi in message_list.messages),
         )),
-        '', IMPORT_HEADER, '\n',
-        '\n'.join(mesg_num_declarations), '\n',
+        '', IMPORT_HEADER,
+        ('\n\n' + '\n'.join(mesg_num_declarations) + '\n\n') if mesg_num_declarations else '\n',
         str(type_list), '\n',
         SPECIAL_FIELD_DECLARATIONS, '\n',
         str(message_list), ''
