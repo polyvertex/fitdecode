@@ -135,8 +135,8 @@ class FitReader:
 
         if hasattr(fileish, 'read'):
             self._fd = fileish
-        elif hasattr(fileish, '__fspath__') or isinstance(fileish, str):
-            self._fd = open(os.fspath(fileish), mode='rb')
+        elif isinstance(fileish, str):
+            self._fd = open(fileish, mode='rb')
         else:
             self._fd = io.BytesIO(fileish)
 
