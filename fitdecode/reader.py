@@ -116,7 +116,7 @@ class FitReader:
         self._read_size = 0    # count bytes read from this file so far in total
 
         # per-chunk state (private)
-        self._chunk_index = 0   # the index number of the current that is currently being read
+        self._chunk_index = 0   # the index number of the current chunk that is currently being read
         self._chunk_offset = 0  # the offset of the current chunk (relative to `read_offset`)
         self._chunk_size = 0    # the size of the current chunk
 

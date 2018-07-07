@@ -9,7 +9,7 @@ A `FIT <http://www.thisisant.com>`_ file parsing and decoding library written in
 Usage Example
 =============
 
-Read a FIT file, chunk by chunk:
+Read a FIT file, frame by frame:
 
 .. code:: python
 
@@ -56,8 +56,8 @@ Main differences between fitdecode and fitparse:
 
 * fitdecode requires Python version 3.6 or greater
 
-* fitdecode is thread-safe in the sense that it does not perform write access
-  to any global variable, and that the objects keep their state storage locally
+* fitdecode allows concurrent reading of multiple files by being thread-safe, in
+  the sense that fitdecode's objects keep their state stored locally
 
 * fitdecode high-level interfaces are not compatible with fitparse's FitFile
 
@@ -88,8 +88,8 @@ Main differences between fitdecode and fitparse:
 Why a new library?
 ==================
 
-It has been decided to create a new library instead of just offering to patch
-fitparse_ because many changes and adds in fitdecode break fitparse's backward
+A new library has been created instead of just offering to patch fitparse_
+because many changes and adds in fitdecode break fitparse's backward
 compatibilty and because it allowed more freedom during the development of
 fitdecode.
 
