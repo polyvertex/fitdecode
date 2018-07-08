@@ -31,7 +31,7 @@ Read a FIT file, frame by frame:
 Installation
 ============
 
-**TODO:** fitdecode is available on `PyPI <https://pypi.org/project/fitdecode/>`_::
+fitdecode is available on `PyPI <https://pypi.org/project/fitdecode/>`_::
 
     $ pip install fitdecode
 
@@ -71,18 +71,6 @@ Main differences between fitdecode and fitparse:
 * fitdecode offers optional access to records, headers and footers in their
   binary form, to allow FIT file cutting, stitching and filtering at binary
   level
-
-* **TODO:**
-  fitdecode offers a higher level of abstraction (``decoder.py`` module) to
-  allow data processing and consolidation at file level.
-
-  One typical use case example is the ``hr`` messages that are appended by
-  Garmin watches (at least) to a "swim" activity file during the post-activity
-  synchronization step, when the HRM strap sends its data to the watch.
-
-  The content of these ``hr`` messages (heart rate) has to be merged to the
-  ``record`` messages of the activity, before being erased from the messages
-  list.
 
 
 Why a new library?

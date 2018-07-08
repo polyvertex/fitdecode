@@ -20,7 +20,6 @@ from .exceptions import *
 from .records import *
 from .reader import *
 from .processors import *
-# from .decoder import *
 
 from . import processors
 from . import profile

@@ -544,16 +544,16 @@ class FitReader:
             else:
                 decoded_value = raw_value
 
-            # update compressed timestamp field
+            # specifics
             if (field_def.def_num == profile.FIELD_TYPE_TIMESTAMP.def_num and
                     raw_value is not None):
+                # update compressed timestamp field
                 self._compressed_ts_accumulator = raw_value
-
-            # hr.event_timestamp_12 fields are accumulated from an initial
-            # hr.event_timestamp value
             elif (def_mesg.global_mesg_num == profile.MESG_NUM_HR and
                     not field_def.is_dev and
                     field_def.def_num == profile.FIELD_NUM_HR_EVENT_TIMESTAMP):
+                # hr.event_timestamp_12 fields are accumulated from an initial
+                # hr.event_timestamp value
                 self._accumulators[
                     def_mesg.global_mesg_num][field_def.def_num] = raw_value
 
