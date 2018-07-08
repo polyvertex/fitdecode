@@ -511,10 +511,12 @@ class FitReader:
                         if component.accumulate and cmp_raw_value is not None:
                             accumulator = self._accumulators[
                                 def_mesg.global_mesg_num]
+
                             cmp_raw_value = self._apply_compressed_accumulation(
                                 cmp_raw_value,
                                 accumulator[component.def_num],
                                 component.bits)
+
                             accumulator[component.def_num] = cmp_raw_value
 
                         # apply scale and offset from component, not from the
@@ -546,6 +548,14 @@ class FitReader:
             if (field_def.def_num == profile.FIELD_TYPE_TIMESTAMP.def_num and
                     raw_value is not None):
                 self._compressed_ts_accumulator = raw_value
+
+            # hr.event_timestamp_12 fields are accumulated from an initial
+            # hr.event_timestamp value
+            elif (def_mesg.global_mesg_num == profile.MESG_NUM_HR and
+                    not field_def.is_dev and
+                    field_def.def_num == profile.FIELD_NUM_HR_EVENT_TIMESTAMP):
+                self._accumulators[
+                    def_mesg.global_mesg_num][field_def.def_num] = raw_value
 
             message_fields.append(types.FieldData(
                 field_def,      # field_def

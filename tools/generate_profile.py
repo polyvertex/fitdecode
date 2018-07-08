@@ -30,6 +30,7 @@ SYMBOL_NAME_SCRUBBER = re.compile(r'\W|^(?=\d)')
 def header(header, indent=0):
     return '%s# %s' % (' ' * indent, (' %s ' % header).center(78 - indent, '*'))
 
+
 def scrub_symbol_name(symbol_name):
     return SYMBOL_NAME_SCRUBBER.sub('_', symbol_name)
 

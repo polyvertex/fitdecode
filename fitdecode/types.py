@@ -200,6 +200,10 @@ class FieldDefinition:
         self.size = size
 
     @property
+    def is_dev(self):
+        return False
+
+    @property
     def name(self):
         return self.field.name if self.field else 'unknown_' + str(self.def_num)
 
@@ -219,6 +223,10 @@ class DevFieldDefinition:
 
         # for dev fields, the base_type and type are always the same
         self.base_type = self.type
+
+    @property
+    def is_dev(self):
+        return True
 
     @property
     def name(self):
