@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
-# NOTE: this script comes from python-fitparse v1.0.1, and has been slightly
-# modified and corrected to fit fitdecode's needs.
+# NOTE: this script originally comes from python-fitparse v1.0.1, and has been
+# slightly corrected and improved to fit fitdecode's needs.
 #
 # Horrible, dirty, ugly, awful, and terrible script to export the Profile.xls
 # that comes with the FIT SDK to the Python data structures in profile.py. You
@@ -24,9 +24,14 @@ import xlrd  # Dev requirement for parsing Excel spreadsheet
 
 XLS_HEADER_MAGIC = b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1'
 
+SYMBOL_NAME_SCRUBBER = re.compile(r'\W|^(?=\d)')
+
 
 def header(header, indent=0):
     return '%s# %s' % (' ' * indent, (' %s ' % header).center(78 - indent, '*'))
+
+def scrub_symbol_name(symbol_name):
+    return SYMBOL_NAME_SCRUBBER.sub('_', symbol_name)
 
 
 PROFILE_HEADER_FIRST_PART = "%s\n%s" % (
@@ -45,11 +50,13 @@ IMPORT_HEADER = '''from .types import (
 
 # This allows to prepend the declaration of some message numbers to the
 # generated file.
-# E.g.: 'hr' -> MESG_NUM_HR = 132
-# CAUTION: no declaration will be inserted for a non-existing message
-# Example:
-#   MESSAGE_NUM_DECLARATIONS = ('hr', )
-MESSAGE_NUM_DECLARATIONS = ()
+# E.g. 'hr' -> MESG_NUM_HR = 132
+MESSAGE_NUM_DECLARATIONS = ('hr', )
+
+# This allows to prepend the declaration of some field numbers of specific
+# messages to the generated file.
+# E.g. 'hr.event_timestamp' -> FIELD_NUM_HR_EVENT_TIMESTAMP = 9
+FIELD_NUM_DECLARATIONS = ('hr.event_timestamp', )
 
 SPECIAL_FIELD_DECLARATIONS = "FIELD_TYPE_TIMESTAMP = Field(name='timestamp', type=FIELD_TYPES['date_time'], def_num=253, units='s')"
 
@@ -168,7 +175,16 @@ class MessageList(namedtuple('MessageList', ('messages'))):
             if mesg.name == mesg_name:
                 return mesg
 
-        raise ValueError('mesg_name')
+        raise ValueError('message "%s" not found' % mesg_name)
+
+    def get_field_by_name(self, mesg_name, field_name):
+        mesg = self.get_by_name(mesg_name)
+
+        for field in mesg.fields:
+            if field.name == field_name:
+                return mesg, field
+
+        raise ValueError('field "%s" not found in message "%s"' % (field_name, mesg_name))
 
 
 class MessageInfo(namedtuple('MessageInfo', ('name', 'num', 'group_name', 'fields', 'comment'))):
@@ -540,10 +556,22 @@ def main(input_xls_or_zip, output_py_path=None):
     mesg_num_declarations = []
     for mesg_name in MESSAGE_NUM_DECLARATIONS:
         mesg_info = message_list.get_by_name(mesg_name)
-        mesg_decl = 'MESG_NUM_%s = %s' % (
-            mesg_name.upper(),
-            str(mesg_info.num) if mesg_info else 'None')
-        mesg_num_declarations.append(mesg_decl)
+
+        mesg_num_declarations.append('MESG_NUM_%s = %s' % (
+            scrub_symbol_name(mesg_name).upper(),
+            str(mesg_info.num) if mesg_info else 'None'))
+
+    field_num_declarations = []
+    for field_fqn in FIELD_NUM_DECLARATIONS:
+        mesg_name, field_name = field_fqn.split('.', maxsplit=1)
+        mesg_info, field_info = message_list.get_field_by_name(mesg_name, field_name)
+
+        field_decl = 'FIELD_NUM_%s_%s = %s' % (
+            scrub_symbol_name(mesg_name).upper(),
+            scrub_symbol_name(field_name).upper(),
+            str(field_info.num))
+
+        field_num_declarations.append(field_decl)
 
     output = '\n'.join([
         "\n%s" % PROFILE_HEADER_FIRST_PART,
@@ -555,8 +583,15 @@ def main(input_xls_or_zip, output_py_path=None):
             len(type_list.types), sum(len(ti.enum) for ti in type_list.types),
             len(message_list.messages), sum(len(mi.fields) for mi in message_list.messages),
         )),
-        '', IMPORT_HEADER,
-        ('\n\n' + '\n'.join(mesg_num_declarations) + '\n\n') if mesg_num_declarations else '\n',
+        '', IMPORT_HEADER
+    ]) + '\n'
+
+    if mesg_num_declarations:
+        output += '\n\n' + '\n'.join(mesg_num_declarations) + '\n'
+    if field_num_declarations:
+        output += '\n\n' + '\n'.join(field_num_declarations) + '\n'
+
+    output += '\n\n' + '\n'.join([
         str(type_list), '\n',
         SPECIAL_FIELD_DECLARATIONS, '\n',
         str(message_list), ''
