@@ -9,6 +9,8 @@
 import re
 import time
 
+from . import profile
+
 __all__ = []
 
 
@@ -25,6 +27,7 @@ CRC_TABLE = (
 
 
 def scrub_method_name(method_name, convert_units=False):
+    """Create a valid Python name out of *method_name*"""
     if convert_units:
         for replace_from, replace_to in UNIT_NAME_TO_FUNC_REPLACEMENTS:
             method_name = method_name.replace(replace_from, str(replace_to))
@@ -32,7 +35,50 @@ def scrub_method_name(method_name, convert_units=False):
     return METHOD_NAME_SCRUBBER.sub('_', method_name)
 
 
+def get_mesg_type(mesg_name_or_num):
+    """
+    Get a :class:`fitdecode.MessageType` from ``profile``, by its name or its
+    global number.
+
+    Raise `ValueError` if type was not found.
+    """
+    for mesg_num, mesg_type in profile.MESSAGE_TYPES.items():
+        if mesg_name_or_num in (mesg_num, mesg_type.name):
+            return mesg_type
+
+    raise ValueError(f'message type "{mesg_name_or_num}" not found')
+
+
+def get_mesg_num(mesg_name):
+    """
+    Get the global number of a message as defined in ``profile``, by its name
+
+    Raise `ValueError` if type was not found.
+    """
+    for mesg_type in profile.MESSAGE_TYPES.values():
+        if mesg_name == mesg_type.name:
+            return mesg_type
+
+    raise ValueError(f'message type "{mesg_name}" not found')
+
+
+def get_field_type(field_name):
+    """
+    Get :class:`fitdecode.FieldType` by name from ``profile``.
+
+    Raise `ValueError` if type was not found.
+    """
+    try:
+        return profile.FIELD_TYPE[field_name]
+    except KeyError:
+        raise ValueError(f'field type "{field_name}" not found')
+
+
 def compute_crc(byteslike, *, crc=CRC_START, start=0, end=None):
+    """
+    Compute the CRC as per FIT definition, of *byteslike* object, from offset
+    *start* (included) to *end* (excluded)
+    """
     if not end:
         end = len(byteslike)
 
