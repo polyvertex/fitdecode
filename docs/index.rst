@@ -10,6 +10,11 @@ Contents
 
     reference
 
+.. toctree::
+    :hidden:
+
+    history
+
 
 Indices and tables
 ==================
