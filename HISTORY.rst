@@ -5,6 +5,14 @@ Change Log
 ==========
 
 
+UNRELEASED
+===================
+
+* Added class property ``frame_type`` (read-only) to `FitHeader`, `FitCRC`,
+  `FitDefinitionMessage` and `FitDataMessage` (``records`` module) to ease and
+  speed up type checking
+
+
 v0.0.1 (2018-07-08)
 ===================
 

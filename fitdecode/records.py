@@ -8,7 +8,15 @@
 
 
 __all__ = [
-    'FitChunk', 'FitHeader', 'FitCRC', 'FitDefinitionMessage', 'FitDataMessage']
+    'FitChunk', 'FitHeader', 'FitCRC', 'FitDefinitionMessage', 'FitDataMessage',
+    'FIT_FRAME_HEADER', 'FIT_FRAME_CRC',
+    'FIT_FRAME_DEFMESG', 'FIT_FRAME_DATAMESG']
+
+
+FIT_FRAME_HEADER = 1
+FIT_FRAME_CRC = 2
+FIT_FRAME_DEFMESG = 3
+FIT_FRAME_DATAMESG = 4
 
 
 class FitChunk:
@@ -21,6 +29,8 @@ class FitChunk:
 
 
 class FitHeader:
+    frame_type = FIT_FRAME_HEADER
+
     __slots__ = (
         'header_size', 'proto_ver', 'profile_ver', 'body_size',
         'crc', 'crc_matched', 'chunk')
@@ -37,6 +47,8 @@ class FitHeader:
 
 
 class FitCRC:
+    frame_type = FIT_FRAME_CRC
+
     __slots__ = ('crc', 'matched', 'chunk')
 
     def __init__(self, crc, matched, chunk):
@@ -46,6 +58,8 @@ class FitCRC:
 
 
 class FitDefinitionMessage:
+    frame_type = FIT_FRAME_DEFMESG
+
     __slots__ = (
         # record header
         'is_developer_data',
@@ -83,6 +97,8 @@ class FitDefinitionMessage:
 
 
 class FitDataMessage:
+    frame_type = FIT_FRAME_DATAMESG
+
     __slots__ = (
         # record header
         'is_developer_data',
