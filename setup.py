@@ -59,7 +59,7 @@ setuptools.setup(
             'fittxt=fitdecode.cmd.fittxt:main']},
 
     install_requires=[],
-    extras_require={'dev': ['sphinx', 'sphinx_rtd_theme']},
+    extras_require={'docs': ['sphinx', 'sphinx_rtd_theme']},
 
     test_suite="tests",
     tests_require=[])

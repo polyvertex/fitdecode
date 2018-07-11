@@ -2,6 +2,10 @@
 fitdecode
 =========
 
+.. image:: https://readthedocs.org/projects/fitdecode/badge/?version=latest
+    :target: http://fitdecode.readthedocs.io/
+    :alt: Latest Docs
+
 A `FIT <http://www.thisisant.com>`_ file parsing and decoding library written in
 `Python3 <https://www.python.org/>`_ (3.6+ only).
 
@@ -80,6 +84,12 @@ A new library has been created instead of just offering to patch fitparse_
 because many changes and adds in fitdecode break fitparse's backward
 compatibilty and because it allowed more freedom during the development of
 fitdecode.
+
+
+Documentation
+=============
+
+Documentation is available at `<http://fitdecode.readthedocs.io/>`_
 
 
 License
