@@ -297,17 +297,17 @@ class FieldData:
         """
         return not self.field_def
 
-    def is_named(self, name):
+    def is_named(self, name_or_num):
         if self.field:
-            if name in (self.field.def_num, self.field.name):
+            if name_or_num in (self.field.def_num, self.field.name):
                 return True
 
         if self.parent_field:
-            if name in (self.parent_field.def_num, self.parent_field.name):
+            if name_or_num in (self.parent_field.def_num, self.parent_field.name):
                 return True
 
         if self.field_def:
-            if name == self.field_def.def_num:
+            if name_or_num == self.field_def.def_num:
                 return True
 
         return False

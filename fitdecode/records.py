@@ -84,8 +84,8 @@ class FitDefinitionMessage:
         self.mesg_type = mesg_type
         self.global_mesg_num = global_mesg_num
         self.endian = endian
-        self.field_defs = field_defs
-        self.dev_field_defs = dev_field_defs
+        self.field_defs = field_defs  #: list of `FieldDefinition`
+        self.dev_field_defs = dev_field_defs  #: list of `DevFieldDefinition`
         self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
 
     @property
@@ -115,7 +115,7 @@ class FitDataMessage:
         self.local_mesg_num = local_mesg_num
         self.time_offset = time_offset
         self.def_mesg = def_mesg  #: `FitDefinitionMessage`
-        self.fields = fields
+        self.fields = fields  #: list of `FieldData`
         self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
 
     def __iter__(self):
@@ -137,11 +137,10 @@ class FitDataMessage:
     def mesg_type(self):
         return self.def_mesg.mesg_type
 
-    def get_field(self, field_name):
+    def get_field(self, field_name_or_num):
         for field in self.fields:
-            if field.is_named(field_name):
+            if field.is_named(field_name_or_num):
                 return field
 
-        # should we just return None instead?
         raise KeyError(
-            f'field named "{field_name}" not found in message "{self.name}"')
+            f'field "{field_name_or_num}" not found in message "{self.name}"')
