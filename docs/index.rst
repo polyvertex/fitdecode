@@ -14,6 +14,7 @@ Contents
     :hidden:
 
     history
+    todo
 
 
 Indices and tables

@@ -11,7 +11,7 @@ version_info = (0, 0, 1)
 
 __title__ = 'fitdecode'
 __fancy_title__ = 'fitdecode'
-__description__ = 'FIT files parser and decoder'
+__description__ = 'FIT file parser and decoder'
 __url__ = 'https://github.com/polyvertex/fitdecode'
 __license__ = 'MIT'
 __author__ = 'Jean-Charles Lefebvre'
