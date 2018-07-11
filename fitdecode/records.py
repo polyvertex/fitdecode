@@ -13,6 +13,8 @@ __all__ = [
     'FIT_FRAME_DEFMESG', 'FIT_FRAME_DATAMESG']
 
 
+_UNSET = object()
+
 FIT_FRAME_HEADER = 1
 FIT_FRAME_CRC = 2
 FIT_FRAME_DEFMESG = 3
@@ -144,3 +146,65 @@ class FitDataMessage:
 
         raise KeyError(
             f'field "{field_name_or_num}" not found in message "{self.name}"')
+
+    def get_value(self, field_name_or_num, *,
+                  fallback=_UNSET, raw_value=False,
+                  fit_type=None, py_type=_UNSET):
+        """
+        Get the value (or raw_value) of a field specified by its name or its
+        definition number (*field_name_or_num*), with optional type checking.
+
+        *fallback* can be specified to avoid `KeyError` being raised in case no
+        field matched *field_name_or_num*.
+
+        *fit_type* can be a `str` to indicate a given FIT type is expected (as
+        defined in FIT profile; e.g. ``date_time``, ``manufacturer``, ...), in
+        which case `TypeError` may be raised in case of a type mismatch.
+
+        *py_type* can be a Python type or a `tuple` of types to expect (as
+        passed to `isinstance`), in which case `TypeError` may be raised in case
+        of a type mismatch.
+
+        *raw_value* can be set to a true value so that the returned value is
+        field's ``raw_value`` property instead of ``value``. This does not
+        impact the way *fit_type* and *py_type* are interpreted.
+        """
+        assert fit_type in (_UNSET, None) or isinstance(fit_type, str)
+
+        field_data = None
+
+        for field in self.fields:
+            if field.is_named(field_name_or_num):
+                field_data = field
+                break
+
+        if not field_data:
+            if fallback is _UNSET:
+                raise KeyError(
+                    f'field "{field_name_or_num}" not found in message ' +
+                    f'"{self.name}"')
+            return fallback
+
+        # check FIT type if needed
+        if fit_type and field_data.type.name != fit_type:
+            raise TypeError(
+                'unexpected type for FIT field ' +
+                f'"{self.name}.{field_name_or_num}" ' +
+                f'(got {field_data.type.name} instead of {fit_type})')
+
+        # pick the right property
+        value = field_data.value if not raw_value else field_data.raw_value
+
+        # check value's type if needed
+        if py_type is not _UNSET and not isinstance(value, py_type):
+            if isinstance(py_type, (tuple, list)):
+                py_type_str = ' or '.join([str(type(t)) for t in py_type])
+            else:
+                py_type_str = str(type(py_type))
+
+            raise TypeError(
+                'unexpected type for FIT value ' +
+                f'"{self.name}.{field_name_or_num}" ' +
+                f'(got {type(value)} instead of {py_type_str})')
+
+        return value
