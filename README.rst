@@ -6,6 +6,10 @@ fitdecode
     :target: http://fitdecode.readthedocs.io/
     :alt: Latest Docs
 
+.. image:: https://travis-ci.org/polyvertex/fitdecode.svg
+    :target: https://travis-ci.org/polyvertex/fitdecode
+
+
 A `FIT <http://www.thisisant.com>`_ file parsing and decoding library written in
 `Python3 <https://www.python.org/>`_ (3.6+ only).
 
