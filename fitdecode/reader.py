@@ -622,7 +622,7 @@ class FitReader:
             # extract the raw value
             raw_value = unpacker.unpack(chunk)
 
-            if base_type.name == 'byte':
+            if base_type.identifier == types.BASE_TYPE_BYTE.identifier:
                 raw_value = base_type.parse(raw_value)
             elif len(raw_value) > 1:
                 # If the field returns with a tuple of values it's definitely an
