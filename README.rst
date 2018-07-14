@@ -44,13 +44,18 @@ fitdecode is available on `PyPI <https://pypi.org/project/fitdecode/>`_::
     $ pip install fitdecode
 
 
-Or you can clone fitdecode's `source code repository
-<https://github.com/polyvertex/fitdecode>`_ before installing it::
+Or, to get the latest working version, you can clone fitdecode's `source code
+repository <https://github.com/polyvertex/fitdecode>`_ before installing it::
 
     $ git clone git@github.com:polyvertex/fitdecode.git
     $ cd fitdecode
     $ python setup.py test     # optional step to run unit tests
     $ python setup.py install
+
+
+Note that for convenience, the ``cmd`` directory located at the root of the
+source code tree can safely be added to your ``PATH``, so that fitdecode
+commands can be called without the package to be installed.
 
 
 Overview
