@@ -5,7 +5,7 @@ Change Log
 ==========
 
 
-UNRELEASED
+v0.1.0 (2018-07-14)
 ===================
 
 * Added class property ``frame_type`` (read-only) to `FitHeader`, `FitCRC`,
