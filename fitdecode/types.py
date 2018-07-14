@@ -314,8 +314,21 @@ class FieldData:
 
 
 def parse_string(byteslike):
-    end = byteslike.index(0x00)
-    return byteslike[:end].decode(encoding='utf-8', errors='replace') or None
+    try:
+        s = byteslike[:byteslike.index(0x00)]
+    except ValueError:
+        # FIT specification defines the 'string' type as follows: "Null
+        # terminated string encoded in UTF-8 format".
+        #
+        # However 'string' values are not always null-terminated when encoded,
+        # according to FIT files created by Garmin devices (e.g. DEVICE.FIT file
+        # from a fenix3).
+        #
+        # So in order to be more flexible, in case index() could not find any
+        # null byte, we just decode the whole bytes-like object.
+        s = byteslike
+
+    return s.decode(encoding='utf-8', errors='replace') or None
 
 
 BASE_TYPE_BYTE = BaseType(
