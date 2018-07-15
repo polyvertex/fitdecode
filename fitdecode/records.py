@@ -113,46 +113,83 @@ class FitDataMessage:
 
     def __init__(self, is_developer_data, local_mesg_num, time_offset, def_mesg,
                  fields, chunk):
-        self.is_developer_data = is_developer_data
-        self.local_mesg_num = local_mesg_num
-        self.time_offset = time_offset
+        self.is_developer_data = is_developer_data  #: Is this a "developer" message?
+        self.local_mesg_num = local_mesg_num  #: The **local** definition number of this message
+        self.time_offset = time_offset  #: Time offset in case header was compressed. `None` otherwise.
         self.def_mesg = def_mesg  #: `FitDefinitionMessage`
         self.fields = fields  #: list of `FieldData`
         self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
 
     def __iter__(self):
-        # sort by whether this is a known field, then its name
-        # return iter(sorted(
-        #     self.fields, key=lambda fd: (int(fd.field is None), fd.name)))
-
+        """Iterate over the `FieldData` object in this mesage"""
         return iter(self.fields)
 
     @property
     def name(self):
+        """Message name"""
         return self.def_mesg.name
 
     @property
     def global_mesg_num(self):
+        """The **global** definition number of this message"""
         return self.def_mesg.global_mesg_num
 
     @property
     def mesg_type(self):
+        """The `MessageType` object this message is associated to"""
         return self.def_mesg.mesg_type
 
-    def get_field(self, field_name_or_num):
+    def get_field(self, field_name_or_num, idx=0):
+        """
+        Get the desired `FieldData` object.
+
+        *field_name_or_num* is the name of the field (`str`), or its definition
+        number (`int`).
+
+        *idx* is the zero-based index of the specified field **among other
+        fields with the same name/number**. I.e. not the index of the field in
+        the list of fields of this message. That is, ``idx=0`` is the first
+        *field_name_or_num* field found in this message.
+
+        *idx* is useful in case a message contains multiple fields with the same
+        *field_name_or_num*.
+
+        .. seealso:: `get_fields`, `get_value`, `get_values`
+        """
+        current_idx = -1
         for field in self.fields:
             if field.is_named(field_name_or_num):
-                return field
+                current_idx += 1
+                if current_idx == idx:
+                    return field
 
         raise KeyError(
-            f'field "{field_name_or_num}" not found in message "{self.name}"')
+            f'field "{field_name_or_num}" (idx #{idx}) not found in ' +
+            f'message "{self.name}"')
+
+    def get_fields(self, field_name_or_num):
+        """
+        Like `get_field` but return a `list` of `FieldData` corresponding to all
+        the *field_name_or_num* fields of this message.
+
+        .. seealso:: `get_field`, `get_value`, `get_values`
+        """
+        fields = []
+
+        for field in self.fields:
+            if field.is_named(field_name_or_num):
+                fields.append(field)
+
+        return fields
 
     def get_value(self, field_name_or_num, *,
-                  fallback=_UNSET, raw_value=False,
+                  idx=0, fallback=_UNSET, raw_value=False,
                   fit_type=None, py_type=_UNSET):
         """
         Get the value (or raw_value) of a field specified by its name or its
         definition number (*field_name_or_num*), with optional type checking.
+
+        *idx* has the same meaning than for `get_field`.
 
         *fallback* can be specified to avoid `KeyError` being raised in case no
         field matched *field_name_or_num*.
@@ -168,29 +205,52 @@ class FitDataMessage:
         *raw_value* can be set to a true value so that the returned value is
         field's ``raw_value`` property instead of ``value``. This does not
         impact the way *fit_type* and *py_type* are interpreted.
+
+        Special case: *field_name_or_num* can be `None`, in which case the field
+        will be selected using *idx* only. In this case, *idx* is interpreted to
+        be the zero-based index in the list of fields.
+
+        .. seealso:: `get_values`, `get_field`, `get_fields`
         """
         assert fit_type in (_UNSET, None) or isinstance(fit_type, str)
 
         field_data = None
 
-        for field in self.fields:
-            if field.is_named(field_name_or_num):
-                field_data = field
-                break
+        if field_name_or_num is None:
+            try:
+                field_data = self.fields[idx]
+                field_name_or_num = field_data.name_or_num
+
+                # change the representation of idx so that its meaning can be
+                # differentiated in case an exception is raised and it has to be
+                # printed later on
+                idx = '[' + str(idx) + ']'
+            except KeyError:
+                # KeyError exception is handled below so that the *fallback*
+                # argument can be honored
+                pass
+        else:
+            current_idx = -1
+            for field in self.fields:
+                if field.is_named(field_name_or_num):
+                    current_idx += 1
+                    if current_idx == idx:
+                        field_data = field
+                        break
 
         if not field_data:
             if fallback is _UNSET:
                 raise KeyError(
-                    f'field "{field_name_or_num}" not found in message ' +
-                    f'"{self.name}"')
+                    f'field "{field_name_or_num}" (idx #{idx}) not found in ' +
+                    f'message "{self.name}"')
             return fallback
 
         # check FIT type if needed
         if fit_type and field_data.type.name != fit_type:
             raise TypeError(
                 'unexpected type for FIT field ' +
-                f'"{self.name}.{field_name_or_num}" ' +
-                f'(got {field_data.type.name} instead of {fit_type})')
+                f'"{self.name}.{field_name_or_num}" (idx #{idx}; ' +
+                f'got {field_data.type.name} instead of {fit_type})')
 
         # pick the right property
         value = field_data.value if not raw_value else field_data.raw_value
@@ -204,7 +264,31 @@ class FitDataMessage:
 
             raise TypeError(
                 'unexpected type for FIT value ' +
-                f'"{self.name}.{field_name_or_num}" ' +
-                f'(got {type(value)} instead of {py_type_str})')
+                f'"{self.name}.{field_name_or_num}" (idx #{idx}; ' +
+                f'got {type(value)} instead of {py_type_str})')
 
         return value
+
+    def get_values(self, field_name_or_num, *,
+                   raw_value=False, fit_type=None, py_type=_UNSET):
+        """
+        Like `get_value` but return a `list` of values from multiple fields with
+        the same *field_name_or_num*.
+
+        It is not possible to specify a *fallback* value so `KeyError` will
+        always be raised in case the specified field was not found.
+
+        The other arguments have the same meaning than for `get_value`.
+
+        .. seealso:: `get_value`, `get_field`, `get_fields`
+        """
+        values = []
+
+        for idx, field_data in enumerate(self.fields):
+            if field_data.is_named(field_name_or_num):
+                values.append(self.get_value(
+                    None, idx=idx, raw_value=raw_value,
+                    fit_type=fit_type, py_type=py_type))
+                assert values[-1].name_or_num == field_name_or_num
+
+        return values

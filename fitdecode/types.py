@@ -246,7 +246,7 @@ class FieldData:
 
     def __init__(self, field_def, field, parent_field, value, raw_value,
                  units=None):
-        self.field_def = field_def
+        self.field_def = field_def  #: `FieldDefinition` object
         self.field = field
         self.parent_field = parent_field
         self.value = value
@@ -261,16 +261,43 @@ class FieldData:
 
     @property
     def name(self):
+        """
+        Field's name as defined in FIT global profile.
+
+        If name was not found in global profile, a string is created with the
+        form: ``unknown_{def_num}`` where ``def_num`` is the field's definition
+        number.
+
+        This value is **NOT** compatible with `is_named`.
+
+        .. seealso:: `name_or_num`
+        """
         return self.field.name if self.field else 'unknown_%d' % self.def_num
 
     @property
+    def name_or_num(self):
+        """
+        Field's name as defined in FIT global profile.
+
+        If name was not found in global profile, ``self.def_num`` is returned
+        (`int`).
+
+        This value is compatible with `is_named`.
+
+        .. seealso:: `name`
+        """
+        return self.field.name if self.field else self.def_num
+
+    @property
     def def_num(self):
+        """Field's definition number (`int`)"""
         # prefer to return the def_num on the field since field_def may be None
         # if this field is dynamic
         return self.field.def_num if self.field else self.field_def.def_num
 
     @property
     def base_type(self):
+        """Field's `BaseType`"""
         # try field_def's base type, if it doesn't exist, this is a dynamically
         # added field, so field doesn't be None
         if self.field_def:
@@ -280,6 +307,7 @@ class FieldData:
 
     @property
     def is_base_type(self):
+        """Field's `BaseType`"""
         return self.field.is_base_type if self.field else True
 
     @property
@@ -298,6 +326,10 @@ class FieldData:
         return not self.field_def
 
     def is_named(self, name_or_num):
+        """
+        Check if this field has the specified name (`str`) or definition number
+        (`int`)
+        """
         if self.field:
             if name_or_num in (self.field.def_num, self.field.name):
                 return True

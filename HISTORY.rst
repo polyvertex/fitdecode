@@ -5,6 +5,18 @@ Change Log
 ==========
 
 
+UNRELEASED
+===================
+
+* Added `FieldData.name_or_num`
+* Added `FitDataMessage.get_fields`
+* Added `FitDataMessage.get_values`
+* Improved `FitDataMessage.get_field` (*idx* arg)
+* Improved `FitDataMessage.get_value` (*idx* arg)
+* Completed documentation of `FitDataMessage`
+* Improved documentation of `FieldData`
+
+
 v0.1.0 (2018-07-14)
 ===================
 
