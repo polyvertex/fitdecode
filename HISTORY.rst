@@ -15,6 +15,9 @@ UNRELEASED
 * Improved `FitDataMessage.get_value` (*idx* arg)
 * Completed documentation of `FitDataMessage`
 * Improved documentation of `FieldData`
+* `FitReader`'s internal state is reset as well after a `FitCRC` has been
+  yielded (i.e. not only when a FIT header is about to be read), in order to
+  avoid incorrect behavior due to malformed FIT stream
 
 
 v0.1.0 (2018-07-14)

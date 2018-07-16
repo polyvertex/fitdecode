@@ -273,10 +273,13 @@ class FitReader:
                 yield crc_obj
                 _update_state()
 
-                # we reached the end of this FIT "file"
-                self._header = None
+                # We've reached the end of this FIT file... To avoid incorrect
+                # behavior due to malformed FIT stream (i.e. next FIT header
+                # missing), reset the internal state now as well, instead of
+                # resetting it only when a FIT header is read.
+                self._on_new_file()
 
-    def _read_header(self):
+    def _on_new_file(self):
         # reset state
         self._crc = utils.CRC_START
         self._header = None
@@ -285,6 +288,9 @@ class FitReader:
         self._local_dev_types = {}
         self._compressed_ts_accumulator = 0
         self._accumulators = {}
+
+    def _read_header(self):
+        self._on_new_file()
 
         try:
             chunk, header_size, proto_ver, profile_ver, body_size, \
