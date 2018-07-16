@@ -5,7 +5,7 @@ Change Log
 ==========
 
 
-UNRELEASED
+v0.2.0 (2018-07-16)
 ===================
 
 * Added `FieldData.name_or_num`
