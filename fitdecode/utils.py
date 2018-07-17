@@ -62,6 +62,38 @@ def get_mesg_num(mesg_name):
     raise ValueError(f'message type "{mesg_name}" not found')
 
 
+def get_mesg_field(mesg_name_or_num, field_name_or_num):
+    """
+    Get the :class:`fitdecode.types.Field` object of a particular field from a
+    particular message.
+
+    Raise `ValueError` if message or field was not found.
+    """
+    mesg_type = get_mesg_type(mesg_name_or_num)
+    for field in mesg_type.fields:
+        if field_name_or_num in (field.def_num, field.name):
+            return field
+
+    raise ValueError(
+        f'field "{field_name_or_num}" not found in ' +
+        f'message "{mesg_name_or_num}"')
+
+
+def get_mesg_field_num(mesg_name_or_num, field_name):
+    """
+    Get the definition number of a particular field from a particular message.
+
+    Raise `ValueError` if message or field was not found.
+    """
+    mesg_type = get_mesg_type(mesg_name_or_num)
+    for field in mesg_type.fields:
+        if field.name == field_name:
+            return field
+
+    raise ValueError(
+        f'field "{field_name}" not found in message "{mesg_name_or_num}"')
+
+
 def get_field_type(field_name):
     """
     Get :class:`fitdecode.FieldType` by name from ``profile``.
