@@ -22,6 +22,8 @@ import zipfile
 import xlrd  # Dev requirement for parsing Excel spreadsheet
 
 
+FIELD_NUM_TIMESTAMP = 253
+
 XLS_HEADER_MAGIC = b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1'
 
 SYMBOL_NAME_SCRUBBER = re.compile(r'\W|^(?=\d)')
@@ -59,7 +61,7 @@ MESSAGE_NUM_DECLARATIONS = ('file_id', 'hr', )
 # E.g. 'hr.event_timestamp' -> FIELD_NUM_HR_EVENT_TIMESTAMP = 9
 FIELD_NUM_DECLARATIONS = ('hr.event_timestamp', )
 
-SPECIAL_FIELD_DECLARATIONS = "FIELD_TYPE_TIMESTAMP = Field(name='timestamp', type=FIELD_TYPES['date_time'], def_num=253, units='s')"
+SPECIAL_FIELD_DECLARATIONS = "FIELD_TYPE_TIMESTAMP = Field(name='timestamp', type=FIELD_TYPES['date_time'], def_num=" + str(FIELD_NUM_TIMESTAMP) + ", units='s')"
 
 IGNORE_TYPE_VALUES = (
     # of the form 'type_name:value_name'
@@ -210,7 +212,7 @@ class MessageInfo(namedtuple('MessageInfo', ('name', 'num', 'group_name', 'field
 
 class FieldInfo(namedtuple('FieldInfo', ('name', 'type', 'num', 'scale', 'offset', 'units', 'components', 'subfields', 'comment'))):
     def __str__(self):
-        if self.num == 253:
+        if self.num == FIELD_NUM_TIMESTAMP:
             # Add trailing comma here because of comment
             assert not self.components and not self.subfields
             return 'FIELD_TYPE_TIMESTAMP,%s' % render_comment(self.comment)
@@ -562,7 +564,8 @@ def main(input_xls_or_zip, output_py_path=None):
             scrub_symbol_name(mesg_name).upper(),
             str(mesg_info.num) if mesg_info else 'None'))
 
-    field_num_declarations = []
+    field_num_declarations = [
+        'FIELD_NUM_TIMESTAMP = ' + str(FIELD_NUM_TIMESTAMP)]
     for field_fqn in FIELD_NUM_DECLARATIONS:
         mesg_name, field_name = field_fqn.split('.', maxsplit=1)
         mesg_info, field_info = message_list.get_field_by_name(mesg_name, field_name)

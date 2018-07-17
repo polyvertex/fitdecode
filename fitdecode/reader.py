@@ -550,7 +550,7 @@ class FitReader:
                 decoded_value = raw_value
 
             # specifics
-            if (field_def.def_num == profile.FIELD_TYPE_TIMESTAMP.def_num and
+            if (field_def.def_num == profile.FIELD_NUM_TIMESTAMP and
                     raw_value is not None):
                 # update compressed timestamp field
                 self._compressed_ts_accumulator = raw_value
