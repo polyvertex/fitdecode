@@ -710,7 +710,7 @@ class FitReader:
         if dev_data_index not in self._local_dev_types:
             raise FitParseError(
                 self._chunk_offset,
-                'dev_data_index {dev_data_index} not defined')
+                f'dev_data_index {dev_data_index} not defined')
 
         field_def_num = message.get_field('field_definition_number').raw_value
         base_type_id = message.get_field('fit_base_type_id').raw_value
