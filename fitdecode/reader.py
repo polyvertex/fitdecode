@@ -496,8 +496,7 @@ class FitReader:
         record_chunks.extend(extra_chunks)
         message_fields = []
 
-        for field_def, raw_value in zip(
-                def_mesg.field_defs + def_mesg.dev_field_defs, raw_values):
+        for field_def, raw_value in zip(def_mesg.all_field_defs, raw_values):
 
             field, parent_field = field_def.field, None
             if field:
@@ -612,7 +611,7 @@ class FitReader:
         raw_values = []
         record_chunks = []
 
-        for field_def in def_mesg.field_defs + def_mesg.dev_field_defs:
+        for field_def in def_mesg.all_field_defs:
             base_type = field_def.base_type
 
             # struct format to read "[N]" base types

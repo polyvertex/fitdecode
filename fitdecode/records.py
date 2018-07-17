@@ -6,6 +6,7 @@
 # This code is licensed under the MIT License.
 # See the LICENSE.txt file at the root of this project.
 
+import itertools
 
 __all__ = [
     'FitChunk', 'FitHeader', 'FitCRC', 'FitDefinitionMessage', 'FitDataMessage',
@@ -96,6 +97,12 @@ class FitDefinitionMessage:
             return self.mesg_type.name
         else:
             return 'unknown_' + str(self.global_mesg_num)
+
+    @property
+    def all_field_defs(self):
+        if not dev_field_defs:
+            return self.dev_field_defs
+        return itertools.chain(self.field_defs, self.dev_field_defs)
 
 
 class FitDataMessage:
