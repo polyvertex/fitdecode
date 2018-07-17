@@ -602,7 +602,7 @@ class FitReader:
             self._processor.on_process_message(self, data_message)
 
         # keep track of the last file_id message
-        if def_mesg.global_mesg_num == 0:
+        if def_mesg.global_mesg_num == profile.MESG_NUM_FILE_ID:
             self._file_id = data_message
 
         return data_message
