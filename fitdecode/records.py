@@ -100,8 +100,8 @@ class FitDefinitionMessage:
 
     @property
     def all_field_defs(self):
-        if not dev_field_defs:
-            return self.dev_field_defs
+        if not self.dev_field_defs:
+            return self.field_defs
         return itertools.chain(self.field_defs, self.dev_field_defs)
 
 
