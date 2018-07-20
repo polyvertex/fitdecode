@@ -94,14 +94,14 @@ class FitReader:
 
     def __init__(self, fileish, *,
                  processor=_UNSET, check_crc=True, keep_raw_chunks=False,
-                 data_bag=None):
+                 data_bag=_UNSET):
         # modifiable options (public)
         self.check_crc = check_crc
 
         # state (public)
         #: the *data_bag* object that was passed to the constructor, or, by
         #: default, a `dict` object
-        self.data_bag = data_bag or {}
+        self.data_bag = {} if data_bag is _UNSET else data_bag
 
         # immutable options (private)
         self._processor = (

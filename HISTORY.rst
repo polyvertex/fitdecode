@@ -10,7 +10,7 @@ UNRELEASED
 
 * Added `fitdecode.utils.get_mesg_field`
 * Added `fitdecode.utils.get_mesg_field_num`
-* Minor improvements
+* Minor improvements and corrections
 
 
 v0.2.0 (2018-07-16)
