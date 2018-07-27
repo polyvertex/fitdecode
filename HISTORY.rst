@@ -5,7 +5,7 @@ Change Log
 ==========
 
 
-UNRELEASED
+v0.3.0 (2018-07-27)
 ===================
 
 * Added `fitdecode.utils.get_mesg_field`
