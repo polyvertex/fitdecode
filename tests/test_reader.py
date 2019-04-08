@@ -375,6 +375,17 @@ class FitReaderTestCase(unittest.TestCase):
             'garmin-edge-820-bike.fit',
             'garmin-edge-820-bike-records.csv')
 
+    def test_fitparse_speed(self):
+        fit = fitdecode.FitReader(_test_file('2019-02-17-062644-ELEMNT-297E-195-0.fit'))
+
+        # find the first 'session' data message
+        msg = next(
+            r for r in fit
+            if isinstance(r, fitdecode.FitDataMessage)
+            and r.name == 'session')
+
+        self.assertEqual(msg.get_value('avg_speed', fit_type='uint16'), 5.86)
+
     def _fitparse_csv_test_helper(self, fit_file, csv_file):
         csv_fp = open(_test_file(csv_file), 'r')
         csv_messages = csv.reader(csv_fp)
