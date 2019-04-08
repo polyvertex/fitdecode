@@ -285,7 +285,8 @@ def parse_args(args=None):
         epilog='fitdecode version ' + fitdecode.__version__)
 
     parser.add_argument(
-        '-o', '--output', type=argparse.FileType(mode='wt'), default='-',
+        '-o', '--output', type=argparse.FileType(mode='wt', encoding='utf-8'),
+        default='-',
         help='File to output data into (defaults to stdout)')
 
     parser.add_argument(
