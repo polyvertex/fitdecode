@@ -176,18 +176,14 @@ class FitDataMessage:
 
     def get_fields(self, field_name_or_num):
         """
-        Like `get_field` but return a `list` of `FieldData` corresponding to all
-        the *field_name_or_num* fields of this message.
+        Like `get_field` but **yield** every `FieldData` object matching
+        *field_name_or_num* fields in this message - i.e. generator.
 
         .. seealso:: `get_field`, `get_value`, `get_values`
         """
-        fields = []
-
         for field in self.fields:
             if field.is_named(field_name_or_num):
-                fields.append(field)
-
-        return fields
+                yield field
 
     def get_value(self, field_name_or_num, *,
                   idx=0, fallback=_UNSET, raw_value=False,
@@ -279,8 +275,8 @@ class FitDataMessage:
     def get_values(self, field_name_or_num, *,
                    raw_value=False, fit_type=None, py_type=_UNSET):
         """
-        Like `get_value` but return a `list` of values from multiple fields with
-        the same *field_name_or_num*.
+        Like `get_value` but **yield** every value of all the fields that match
+        *field_name_or_num* - i.e. generator.
 
         It is not possible to specify a *fallback* value so `KeyError` will
         always be raised in case the specified field was not found.
@@ -289,13 +285,10 @@ class FitDataMessage:
 
         .. seealso:: `get_value`, `get_field`, `get_fields`
         """
-        values = []
-
         for idx, field_data in enumerate(self.fields):
             if field_data.is_named(field_name_or_num):
-                values.append(self.get_value(
+                value = self.get_value(
                     None, idx=idx, raw_value=raw_value,
-                    fit_type=fit_type, py_type=py_type))
+                    fit_type=fit_type, py_type=py_type)
                 assert values[-1].name_or_num == field_name_or_num
-
-        return values
+                yield value
