@@ -13,6 +13,7 @@ from collections import OrderedDict
 import datetime
 import decimal
 import os.path
+import sys
 
 import fitdecode
 
@@ -366,6 +367,8 @@ def main(args=None):
         txt_print(frame)
         echo('')
 
+    return 0
+
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

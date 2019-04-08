@@ -13,6 +13,7 @@ from collections import OrderedDict
 import datetime
 import json
 import types
+import sys
 
 import fitdecode
 
@@ -165,6 +166,8 @@ def main(args=None):
 
     json.dump(frames, fp=options.output, cls=RecordJSONEncoder)
 
+    return 0
+
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

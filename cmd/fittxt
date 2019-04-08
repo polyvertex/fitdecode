@@ -16,4 +16,4 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from fitdecode.cmd import fittxt
 
 if __name__ == '__main__':
-    fittxt.main()
+    sys.exit(fittxt.main())
