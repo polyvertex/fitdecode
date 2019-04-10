@@ -54,12 +54,14 @@ IMPORT_HEADER = '''from .types import (
 # This allows to prepend the declaration of some message numbers to the
 # generated file.
 # E.g. 'hr' -> MESG_NUM_HR = 132
-MESSAGE_NUM_DECLARATIONS = ('file_id', 'hr', )
+MESSAGE_NUM_DECLARATIONS = ('file_id', 'hr')
 
 # This allows to prepend the declaration of some field numbers of specific
 # messages to the generated file.
 # E.g. 'hr.event_timestamp' -> FIELD_NUM_HR_EVENT_TIMESTAMP = 9
-FIELD_NUM_DECLARATIONS = ('hr.event_timestamp', )
+FIELD_NUM_DECLARATIONS = (
+    'hr.event_timestamp',
+    'hr.event_timestamp_12')
 
 SPECIAL_FIELD_DECLARATIONS = "FIELD_TYPE_TIMESTAMP = Field(name='timestamp', type=FIELD_TYPES['date_time'], def_num=" + str(FIELD_NUM_TIMESTAMP) + ", units='s')"
 
@@ -562,20 +564,22 @@ def main(input_xls_or_zip, output_py_path=None):
     for mesg_name in MESSAGE_NUM_DECLARATIONS:
         mesg_info = message_list.get_by_name(mesg_name)
 
-        mesg_num_declarations.append('MESG_NUM_%s = %s' % (
+        mesg_num_declarations.append('MESG_NUM_%s = %s  # message "%s"' % (
             scrub_symbol_name(mesg_name).upper(),
-            str(mesg_info.num) if mesg_info else 'None'))
+            str(mesg_info.num) if mesg_info else 'None',
+            mesg_name))
 
     field_num_declarations = [
-        'FIELD_NUM_TIMESTAMP = ' + str(FIELD_NUM_TIMESTAMP)]
+        'FIELD_NUM_TIMESTAMP = ' + str(FIELD_NUM_TIMESTAMP) + '  # field "timestamp"']
     for field_fqn in FIELD_NUM_DECLARATIONS:
         mesg_name, field_name = field_fqn.split('.', maxsplit=1)
         mesg_info, field_info = message_list.get_field_by_name(mesg_name, field_name)
 
-        field_decl = 'FIELD_NUM_%s_%s = %s' % (
+        field_decl = 'FIELD_NUM_%s_%s = %s  # field "%s"' % (
             scrub_symbol_name(mesg_name).upper(),
             scrub_symbol_name(field_name).upper(),
-            str(field_info.num))
+            str(field_info.num),
+            field_fqn)
 
         field_num_declarations.append(field_decl)
 
