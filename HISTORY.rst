@@ -5,6 +5,27 @@ Change Log
 ==========
 
 
+v0.4.0 (2019-04-10)
+===================
+
+* Added `fitdecode.FitDataMessage.has_field`
+* `fitdecode.FitDataMessage.get_fields` is now a generator
+* `fitdecode.FitDataMessage.get_values` is now a generator
+* `fitdecode.DefaultDataProcessor` now converts ``hr.event_timestamp`` values
+  that were populated from ``hr.event_timestamp_12`` components to
+  `datetime.datetime` objects for convenience
+* ``fitjson`` and ``fittxt`` utilities:
+  * Added support for input files with Unicode characters
+  * Still write output file even if an error occurred while parsing FIT file
+* Fixed handling of some FIT fields that are both scale and components.
+  See https://github.com/dtcooper/python-fitparse/issues/84
+* Improved support for malformed FIT files.
+  See https://github.com/dtcooper/python-fitparse/issues/62
+* ``generate_profile`` utility slightly improved
+* Added some unit tests
+* Minor improvements and corrections
+
+
 v0.3.0 (2018-07-27)
 ===================
 
