@@ -160,6 +160,26 @@ class FitReaderTestCase(unittest.TestCase):
         except fitdecode.FitEOFError:
             pass
 
+    def test_fitparse_invalid_chained_files(self):
+        """Detect errors when files are chained - concatenated - together"""
+        try:
+            tuple(fitdecode.FitReader(_invalid_test_file('activity-activity-filecrc.fit')))
+            self.fail("Didn't detect a CRC error in the chained file")
+        except fitdecode.FitCRCError:
+            pass
+
+        try:
+            tuple(fitdecode.FitReader(_invalid_test_file('activity-settings-corruptheader.fit')))
+            self.fail("Didn't detect a header error in the chained file")
+        except fitdecode.FitHeaderError:
+            pass
+
+        try:
+            tuple(fitdecode.FitReader(_invalid_test_file('activity-settings-nodata.fit')))
+            self.fail("Didn't detect an EOF error in the chaned file")
+        except fitdecode.FitEOFError:
+            pass
+
     def test_fitparse_elemnt_bolt_developer_data_id_without_application_id(self):
         """
         Test that a file without application id set inside developer_data_id is
@@ -375,17 +395,6 @@ class FitReaderTestCase(unittest.TestCase):
             'garmin-edge-820-bike.fit',
             'garmin-edge-820-bike-records.csv')
 
-    def test_fitparse_speed(self):
-        fit = fitdecode.FitReader(_test_file('2019-02-17-062644-ELEMNT-297E-195-0.fit'))
-
-        # find the first 'session' data message
-        msg = next(
-            r for r in fit
-            if isinstance(r, fitdecode.FitDataMessage)
-            and r.name == 'session')
-
-        self.assertEqual(msg.get_value('avg_speed', fit_type='uint16'), 5.86)
-
     def _fitparse_csv_test_helper(self, fit_file, csv_file):
         csv_fp = open(_test_file(csv_file), 'r')
         csv_messages = csv.reader(csv_fp)
@@ -464,6 +473,39 @@ class FitReaderTestCase(unittest.TestCase):
             pass
 
         csv_fp.close()
+
+    def test_fitparse_speed(self):
+        fit = fitdecode.FitReader(_test_file('2019-02-17-062644-ELEMNT-297E-195-0.fit'))
+
+        # find the first 'session' data message
+        msg = next(
+            r for r in fit
+            if isinstance(r, fitdecode.FitDataMessage)
+            and r.name == 'session')
+
+        self.assertEqual(msg.get_value('avg_speed', fit_type='uint16'), 5.86)
+
+    def test_fitparse_units_processor(self):
+        for x in ('2013-02-06-12-11-14.fit', '2015-10-13-08-43-15.fit',
+                  'Activity.fit', 'Edge810-Vector-2013-08-16-15-35-10.fit',
+                  'MonitoringFile.fit', 'Settings.fit', 'Settings2.fit',
+                  'WeightScaleMultiUser.fit', 'WeightScaleSingleUser.fit',
+                  'WorkoutCustomTargetValues.fit', 'WorkoutIndividualSteps.fit',
+                  'WorkoutRepeatGreaterThanStep.fit', 'WorkoutRepeatSteps.fit',
+                  'activity-large-fenxi2-multisport.fit', 'activity-small-fenix2-run.fit',
+                  'antfs-dump.63.fit', 'sample-activity-indoor-trainer.fit',
+                  'sample-activity.fit', 'garmin-fenix-5-bike.fit',
+                  'garmin-fenix-5-run.fit', 'garmin-fenix-5-walk.fit',
+                  'garmin-edge-820-bike.fit'):
+            tuple(fitdecode.FitReader(
+                _test_file(x),
+                processor=fitdecode.StandardUnitsDataProcessor()))
+
+    def test_fitparse_int_long(self):
+        """Test that ints are properly shifted and scaled"""
+        fit = tuple(fitdecode.FitReader(_test_file('event_timestamp.fit')))
+        raw_value = fit[-2].get_value('event_timestamp', idx=0, raw_value=True)
+        self.assertEqual(raw_value, 863.486328125)
 
 
 if __name__ == '__main__':
