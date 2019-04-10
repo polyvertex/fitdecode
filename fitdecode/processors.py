@@ -83,9 +83,10 @@ class DefaultDataProcessor:
             reader, field_data)
 
     def on_process_field(self, reader, field_data):
-        self._run_processor(
-            'process_field_' + field_data.name,
-            reader, field_data)
+        if field_data.name:
+            self._run_processor(
+                'process_field_' + field_data.name,
+                reader, field_data)
 
     def on_process_unit(self, reader, field_data):
         if field_data.units:
@@ -189,10 +190,10 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
     """
     A `DefaultDataProcessor` that also:
 
-    * Converts ``distance`` and ``total_distance`` fields to ``km`` (in ``m`` by
-      default)
-    * Converts all ``*_speeds`` fields (by name) to ``km/h`` (in ``m/s`` by
-      default)
+    * Converts ``distance`` and ``total_distance`` fields to ``km``
+      (standard's default is ``m``)
+    * Converts all ``speed`` and ``*_speeds`` fields (by name) to ``km/h``
+      (standard's default is ``m/s``)
     * Converts GPS coordinates (i.e. FIT's semicircles type) to ``deg``
 
     .. seealso:: `DefaultDataProcessor`
@@ -204,7 +205,7 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
 
         All other units will use the default method.
         """
-        if field_data.name.endswith('_speed'):
+        if field_data.name and field_data.name.endswith('_speed'):
             self.process_field_speed(reader, field_data)
         else:
             super().on_process_field(reader, field_data)
@@ -219,7 +220,15 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
 
     def process_field_speed(self, reader, field_data):
         if field_data.value is not None:
-            field_data.value *= 60.0 * 60.0 / 1000.0
+            factor = 60.0 * 60.0 / 1000.0
+
+            # record.enhanced_speed field can be a tuple...
+            # see https://github.com/dtcooper/python-fitparse/issues/62
+            if isinstance(field_data.value, tuple):
+                field_data.value = tuple(x * factor for x in field_data.value)
+            else:
+                field_data.value *= factor
+
         field_data.units = 'km/h'
 
     def process_units_semicircles(self, reader, field_data):
