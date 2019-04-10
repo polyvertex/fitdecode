@@ -146,6 +146,21 @@ class FitDataMessage:
         """The `MessageType` object this message is associated to"""
         return self.def_mesg.mesg_type
 
+    def has_field(self, field_name_or_num):
+        """
+        Is the desired field present in this message?
+
+        *field_name_or_num* is the name of the field (`str`), or its definition
+        number (`int`).
+
+        .. seealso:: `get_field`, `get_fields`, `get_value`, `get_values`
+        """
+        for field in self.fields:
+            if field.is_named(field_name_or_num):
+                return True
+
+        return False
+
     def get_field(self, field_name_or_num, idx=0):
         """
         Get the desired `FieldData` object.
@@ -161,7 +176,7 @@ class FitDataMessage:
         *idx* is useful in case a message contains multiple fields with the same
         *field_name_or_num*.
 
-        .. seealso:: `get_fields`, `get_value`, `get_values`
+        .. seealso:: `get_fields`, `get_value`, `get_values`, `has_field`
         """
         current_idx = -1
         for field in self.fields:
@@ -179,7 +194,7 @@ class FitDataMessage:
         Like `get_field` but **yield** every `FieldData` object matching
         *field_name_or_num* fields in this message - i.e. generator.
 
-        .. seealso:: `get_field`, `get_value`, `get_values`
+        .. seealso:: `get_field`, `get_value`, `get_values`, `has_field`
         """
         for field in self.fields:
             if field.is_named(field_name_or_num):
@@ -213,7 +228,7 @@ class FitDataMessage:
         will be selected using *idx* only. In this case, *idx* is interpreted to
         be the zero-based index in the list of fields.
 
-        .. seealso:: `get_values`, `get_field`, `get_fields`
+        .. seealso:: `get_values`, `get_field`, `get_fields`, `has_field`
         """
         assert fit_type in (_UNSET, None) or isinstance(fit_type, str)
 
@@ -283,7 +298,7 @@ class FitDataMessage:
 
         The other arguments have the same meaning than for `get_value`.
 
-        .. seealso:: `get_value`, `get_field`, `get_fields`
+        .. seealso:: `get_value`, `get_field`, `get_fields`, `has_field`
         """
         for idx, field_data in enumerate(self.fields):
             if field_data.is_named(field_name_or_num):
