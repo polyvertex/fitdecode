@@ -1,6 +1,6 @@
 # fitdecode
 #
-# Copyright (c) 2018 Jean-Charles Lefebvre
+# Copyright (c) 2018-2019 Jean-Charles Lefebvre
 # All rights reserved.
 #
 # This code is licensed under the MIT License.
@@ -16,6 +16,6 @@ __url__ = 'https://github.com/polyvertex/fitdecode'
 __license__ = 'MIT'
 __author__ = 'Jean-Charles Lefebvre'
 __author_email__ = 'polyvertex@gmail.com'
-__copyright__ = 'Copyright 2018 Jean-Charles Lefebvre'
+__copyright__ = 'Copyright 2018-2019 Jean-Charles Lefebvre'
 
 __keywords__ = ['fit', 'ant', 'file', 'parse', 'parser', 'decode', 'decoder']

@@ -2,7 +2,7 @@
 #
 # fitdecode
 #
-# Copyright (c) 2018 Jean-Charles Lefebvre
+# Copyright (c) 2018-2019 Jean-Charles Lefebvre
 # All rights reserved.
 #
 # This code is licensed under the MIT License.
