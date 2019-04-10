@@ -80,7 +80,7 @@ def txt_encode(obj):
     if isinstance(obj, fitdecode.FitHeader):
         crc = obj.crc if obj.crc else 0
         return PrintableObject(
-            _label='fit_header',
+            _label=f'chunk#{obj.chunk.index} - fit_header',
             header_size=obj.header_size,
             proto_ver='(' + ', '.join([str(v) for v in obj.proto_ver]) + ')',
             profile_ver='(' + ', '.join([str(v) for v in obj.profile_ver]) + ')',
@@ -91,14 +91,14 @@ def txt_encode(obj):
 
     if isinstance(obj, fitdecode.FitCRC):
         return PrintableObject(
-            _label='fit_crc',
+            _label=f'chunk#{obj.chunk.index} - fit_crc',
             crc=f'{obj.crc:#06x}',
             matched=obj.matched,
             chunk=obj.chunk)
 
     if isinstance(obj, fitdecode.FitDefinitionMessage):
         return PrintableObject(
-            _label=f'fit_definition - {obj.name} #{obj.local_mesg_num}({obj.global_mesg_num})',
+            _label=f'chunk#{obj.chunk.index} - fit_definition - {obj.name} msg#{obj.local_mesg_num}.{obj.global_mesg_num}',
             chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
@@ -111,7 +111,7 @@ def txt_encode(obj):
 
     if isinstance(obj, fitdecode.FitDataMessage):
         return PrintableObject(
-            _label=f'fit_data - {obj.name} #{obj.local_mesg_num}({obj.global_mesg_num})',
+            _label=f'chunk#{obj.chunk.index} - fit_data - {obj.name} msg#{obj.local_mesg_num}.{obj.global_mesg_num}',
             chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,

@@ -104,10 +104,10 @@ class FitReader:
         self.data_bag = {} if data_bag is _UNSET else data_bag
 
         # immutable options (private)
-        self._processor = (
-            processors.DefaultDataProcessor()
-            if processor is _UNSET
-            else processor)
+        if processor is _UNSET:
+            self._processor = processors.DefaultDataProcessor()
+        else:
+            self._processor = processor
         self._keep_raw = keep_raw_chunks
 
         # state (private)
@@ -240,6 +240,7 @@ class FitReader:
             if not self._header:
                 assert self._body_bytes_left == 0
 
+                self._on_new_file()
                 self._read_header()
                 if not self._header:
                     break
@@ -296,8 +297,6 @@ class FitReader:
         self._hr_start_timestamp = 0
 
     def _read_header(self):
-        self._on_new_file()
-
         try:
             chunk, header_size, proto_ver, profile_ver, body_size, \
                 header_magic = self._read_struct('<2BHI4s')
