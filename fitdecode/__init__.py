@@ -21,8 +21,8 @@ from .records import *
 from .reader import *
 from .processors import *
 
-from . import processors
-from . import profile
-from . import reader
 from . import types
+from . import profile
 from . import utils
+from . import processors
+from . import reader

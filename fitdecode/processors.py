@@ -8,6 +8,7 @@
 
 import datetime
 
+from . import profile
 from .utils import scrub_method_name
 
 __all__ = [
@@ -145,6 +146,24 @@ class DefaultDataProcessor:
             h, m = divmod(m, 60)
             field_data.value = datetime.time(h, m, s)
             field_data.units = None
+
+    def process_message_hr(self, reader, data_message):
+        """
+        Convert populated ``event_timestamp`` component values of the ``hr`` to
+        `datetime.datetime` objects
+        """
+        if not data_message.has_field(profile.FIELD_NUM_HR_EVENT_TIMESTAMP_12):
+            # We want to convert only populated *event_timestamp* fields that
+            # were originally computed from the *event_timestamp_12* value
+            return
+
+        for field_data in data_message.get_fields(
+                profile.FIELD_NUM_HR_EVENT_TIMESTAMP):
+            if field_data is not None:
+                field_data.value = datetime.datetime.fromtimestamp(
+                    FIT_UTC_REFERENCE + field_data.value,
+                    datetime.timezone.utc)
+                field_data.units = None  # units were 's', set to None
 
     def _run_processor(self, method_name, reader, data):
         method = self._get_method(method_name)

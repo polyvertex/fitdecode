@@ -129,6 +129,8 @@ class FitReader:
         self._local_dev_types = {}   # registry of developer types
         self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"
         self._accumulators = {}
+        self._last_timestamp = 0
+        self._hr_start_timestamp = 0  # special case for the ``hr`` message
 
         if hasattr(fileish, '__fspath__'):
             fileish = os.fspath(fileish)
@@ -219,6 +221,8 @@ class FitReader:
         self._local_dev_types = {}
         self._compressed_ts_accumulator = 0
         self._accumulators = {}
+        self._last_timestamp = 0
+        self._hr_start_timestamp = 0
 
     # ONLY PRIVATE METHODS BELOW ***********************************************
 
@@ -288,6 +292,8 @@ class FitReader:
         self._local_dev_types = {}
         self._compressed_ts_accumulator = 0
         self._accumulators = {}
+        self._last_timestamp = 0
+        self._hr_start_timestamp = 0
 
     def _read_header(self):
         self._on_new_file()
@@ -505,6 +511,12 @@ class FitReader:
 
                 # resolve component fields
                 if field.components:
+                    # special case for hr.event_timestamp_12
+                    is_hr_event_timestamp_12 = (
+                        def_mesg.global_mesg_num == profile.MESG_NUM_HR and
+                        not field_def.is_dev and
+                        field_def.def_num == profile.FIELD_NUM_HR_EVENT_TIMESTAMP_12)
+
                     for component in field.components:
                         # render its raw value
                         try:
@@ -537,6 +549,11 @@ class FitReader:
                             cmp_field, def_mesg, raw_values)
                         cmp_value = cmp_field.render(cmp_raw_value)
 
+                        # special case: hr.event_timestamp_12
+                        if is_hr_event_timestamp_12:
+                            assert self._hr_start_timestamp > 0
+                            cmp_value += self._hr_start_timestamp
+
                         message_fields.append(types.FieldData(
                             None,              # field_def
                             cmp_field,         # field
@@ -552,6 +569,7 @@ class FitReader:
             # specifics
             if (field_def.def_num == profile.FIELD_NUM_TIMESTAMP and
                     raw_value is not None):
+                self._last_timestamp = decoded_value
                 # update compressed timestamp field
                 self._compressed_ts_accumulator = raw_value
             elif (def_mesg.global_mesg_num == profile.MESG_NUM_HR and
@@ -559,8 +577,8 @@ class FitReader:
                     field_def.def_num == profile.FIELD_NUM_HR_EVENT_TIMESTAMP):
                 # hr.event_timestamp_12 fields are accumulated from an initial
                 # hr.event_timestamp value
-                self._accumulators[
-                    def_mesg.global_mesg_num][field_def.def_num] = raw_value
+                # assert self._last_timestamp > 0
+                self._hr_start_timestamp = self._last_timestamp
 
             message_fields.append(types.FieldData(
                 field_def,      # field_def
