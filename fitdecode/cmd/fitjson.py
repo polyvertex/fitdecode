@@ -14,6 +14,7 @@ import datetime
 import json
 import types
 import sys
+import traceback
 
 import fitdecode
 
@@ -144,25 +145,34 @@ def main(args=None):
     options = parse_args(args)
 
     frames = []
-    with fitdecode.FitReader(
-            options.infile,
-            processor=fitdecode.StandardUnitsDataProcessor(),
-            check_crc=not(options.nocrc),
-            keep_raw_chunks=True) as fit:
-        for frame in fit:
-            if options.nodef and isinstance(
-                    frame, fitdecode.FitDefinitionMessage):
-                continue
+    exception_msg = None
+    try:
+        with fitdecode.FitReader(
+                options.infile,
+                processor=fitdecode.StandardUnitsDataProcessor(),
+                check_crc=not(options.nocrc),
+                keep_raw_chunks=True) as fit:
+            for frame in fit:
+                if options.nodef and isinstance(
+                        frame, fitdecode.FitDefinitionMessage):
+                    continue
 
-            if (options.filter and
-                    isinstance(frame, (
-                        fitdecode.FitDefinitionMessage,
-                        fitdecode.FitDataMessage)) and
-                    (frame.name not in options.filter) and
-                    (frame.global_mesg_num not in options.filter)):
-                continue
+                if (options.filter and
+                        isinstance(frame, (
+                            fitdecode.FitDefinitionMessage,
+                            fitdecode.FitDataMessage)) and
+                        (frame.name not in options.filter) and
+                        (frame.global_mesg_num not in options.filter)):
+                    continue
 
-            frames.append(frame)
+                frames.append(frame)
+    except Exception:
+        print(
+            ('WARNING: the following error occurred while parsing FIT file. ' +
+            'Output file might be incomplete or corrupted.'),
+            file=sys.stderr)
+        print('', file=sys.stderr)
+        traceback.print_exc()
 
     json.dump(frames, fp=options.output, cls=RecordJSONEncoder)
 

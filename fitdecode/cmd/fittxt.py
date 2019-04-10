@@ -14,6 +14,7 @@ import datetime
 import decimal
 import os.path
 import sys
+import traceback
 
 import fitdecode
 
@@ -98,7 +99,7 @@ def txt_encode(obj):
 
     if isinstance(obj, fitdecode.FitDefinitionMessage):
         return PrintableObject(
-            _label=f'chunk#{obj.chunk.index} - fit_definition - {obj.name} msg#{obj.local_mesg_num}.{obj.global_mesg_num}',
+            _label=f'chunk#{obj.chunk.index} - fit_definition - {obj.name} (loc#{obj.local_mesg_num} glob#{obj.global_mesg_num})',
             chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
@@ -111,7 +112,7 @@ def txt_encode(obj):
 
     if isinstance(obj, fitdecode.FitDataMessage):
         return PrintableObject(
-            _label=f'chunk#{obj.chunk.index} - fit_data - {obj.name} msg#{obj.local_mesg_num}.{obj.global_mesg_num}',
+            _label=f'chunk#{obj.chunk.index} - fit_data - {obj.name} (loc#{obj.local_mesg_num} glob#{obj.global_mesg_num})',
             chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
@@ -334,29 +335,43 @@ def main(args=None):
 
     # fully parse input file and filter out the unwanted messages
     frames = []
-    with fitdecode.FitReader(
-            options.infile,
-            processor=fitdecode.StandardUnitsDataProcessor(),
-            check_crc=not(options.nocrc),
-            keep_raw_chunks=True) as fit:
-        for frame in fit:
-            if options.nodef and isinstance(
-                    frame, fitdecode.FitDefinitionMessage):
-                continue
+    exception_msg = None
+    try:
+        with fitdecode.FitReader(
+                options.infile,
+                processor=fitdecode.StandardUnitsDataProcessor(),
+                check_crc=not(options.nocrc),
+                keep_raw_chunks=True) as fit:
+            for frame in fit:
+                if options.nodef and isinstance(
+                        frame, fitdecode.FitDefinitionMessage):
+                    continue
 
-            if (options.filter and
-                    isinstance(frame, (
-                        fitdecode.FitDefinitionMessage,
-                        fitdecode.FitDataMessage)) and
-                    (frame.name not in options.filter) and
-                    (frame.global_mesg_num not in options.filter)):
-                continue
+                if (options.filter and
+                        isinstance(frame, (
+                            fitdecode.FitDefinitionMessage,
+                            fitdecode.FitDataMessage)) and
+                        (frame.name not in options.filter) and
+                        (frame.global_mesg_num not in options.filter)):
+                    continue
 
-            frames.append(frame)
+                frames.append(frame)
+    except Exception:
+        print(
+            ('WARNING: error(s) occurred while parsing FIT file. ' +
+            'See output file for more info.'),
+            file=sys.stderr)
+        exception_msg = traceback.format_exc()
 
-    # print some statistics before starting
-    txt_print(global_stats(frames, options))
-    echo('')
+    # print some statistics as a header
+    if not exception_msg:
+        txt_print(global_stats(frames, options))
+        echo('')
+    else:
+        echo('ERROR OCCURRED WHILE PARSING', options.infile.name)
+        echo('')
+        echo(exception_msg)
+        echo('')
 
     # pretty-print the file
     had_frames = False
