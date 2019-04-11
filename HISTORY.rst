@@ -17,7 +17,7 @@ v0.4.0 (2019-04-10)
 * ``fitjson`` and ``fittxt`` utilities:
   * Added support for input files with Unicode characters
   * Still write output file even if an error occurred while parsing FIT file
-* Fixed handling of some FIT fields that are both scale and components.
+* Fixed handling of some FIT fields that are both scaled and components.
   See https://github.com/dtcooper/python-fitparse/issues/84
 * Improved support for malformed FIT files.
   See https://github.com/dtcooper/python-fitparse/issues/62

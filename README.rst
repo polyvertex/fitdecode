@@ -69,10 +69,13 @@ Main differences between fitdecode and fitparse:
 
 * fitdecode requires Python version 3.6 or greater
 
+* fitdecode is faster
+
 * fitdecode allows concurrent reading of multiple files by being thread-safe, in
   the sense that fitdecode's objects keep their state stored locally
 
-* fitdecode high-level interfaces are not compatible with fitparse's FitFile
+* fitdecode high-level interface - FitReader - is not compatible with fitparse's
+  FitFile
 
 * fitdecode does not discard the FIT header and the CRC footer while iterating
   a file, which allow to get a complete 1:1 representation of the file that is
@@ -80,6 +83,9 @@ Main differences between fitdecode and fitparse:
 
 * This also allows the client to easily deal with so-called chained FIT files,
   as per FIT SDK definition (i.e. concatenated FIT files)
+
+* CRC computation and matching are both optional. CRC can be matched, only
+  computed, or fully ignored for faster reading.
 
 * fitdecode offers optional access to records, headers and footers in their
   binary form, to allow FIT file cutting, stitching and filtering at binary

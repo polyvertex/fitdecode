@@ -22,7 +22,7 @@ class FitCRCError(FitError):
 class FitEOFError(FitError):
     def __init__(self, expected, got, offset, message=''):
         self.expected = expected  #: number of expected bytes
-        self.got = got            #: number of bytes read
+        self.got = got  #: number of bytes read
         self.offset = offset  #: the file offset from which reading took place
 
         desc = f'expected {self.expected} bytes, got {self.got} @ {self.offset}'
