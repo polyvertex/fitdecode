@@ -13,7 +13,7 @@ from .utils import scrub_method_name
 
 __all__ = [
     'FIT_UTC_REFERENCE', 'FIT_DATETIME_MIN',
-    'DefaultDataProcessor', 'StandardUnitsDataProcessor']
+    'DataProcessorBase', 'DefaultDataProcessor', 'StandardUnitsDataProcessor']
 
 
 #: Datetimes (uint32) represent seconds since this ``FIT_UTC_REFERENCE``
@@ -25,12 +25,11 @@ FIT_UTC_REFERENCE = 631065600
 FIT_DATETIME_MIN = 0x10000000
 
 
-class DefaultDataProcessor:
+class DataProcessorBase:
     """
-    Processor to change raw values to more comfortable ones.
+    Data processing base class.
 
-    This is the default data processor used by :class:`fitdecode.FitReader` if
-    you do not specify any.
+    This class does nothing. It is meant to be derived.
 
     The following methods are called by :class:`fitdecode.FitReader`:
 
@@ -59,13 +58,13 @@ class DefaultDataProcessor:
         def process_type_<type_name>(reader, field_data)
         def process_field_<field_name>(reader, field_data)  # can be unknown_XYZ but NOT recommended
         def process_units_<unit_name>(reader, field_data)
-        def process_message_<mesg_name|mesg_type_num>(reader, data_message)
+        def process_message_<mesg_name>(reader, data_message)
 
     ``process_*`` methods are not expected to return any value and may alter
-    the content of the passed *field_data* and *data_message* arguments
-    (:class:`fitdecode.types.FieldData`) if needed.
+    the content of the passed *field_data* (:class:`fitdecode.FieldData`) and
+    *data_message* (:class:`fitdecode.FitDataMessage`) arguments if needed.
 
-    .. seealso:: `StandardUnitsDataProcessor`
+    .. seealso:: `DefaultDataProcessor`, `StandardUnitsDataProcessor`
     """
 
     def __init__(self):
@@ -98,6 +97,37 @@ class DefaultDataProcessor:
         self._run_processor(
             'process_message_' + data_message.def_mesg.name,
             reader, data_message)
+
+    def _run_processor(self, method_name, reader, data):
+        method = self._resolve_method(method_name)
+        if method is not None:
+            method(reader, data)
+
+    def _resolve_method(self, method_name):
+        method = self._method_cache.get(method_name, False)
+        if method is not False:
+            return method
+
+        scrubbed_method_name = scrub_method_name(method_name)
+        method = getattr(self, scrubbed_method_name, None)
+
+        self._method_cache[method_name] = method
+
+        return method
+
+
+class DefaultDataProcessor(DataProcessorBase):
+    """
+    This is the default data processor used by :class:`fitdecode.FitReader`. It
+    derives from :class:`DataProcessorBase`.
+
+    This data processor converts some raw values to more comfortable ones.
+
+    .. seealso:: `StandardUnitsDataProcessor`, `DataProcessorBase`
+    """
+
+    def __init__(self):
+        super().__init__()
 
     def process_type_bool(self, reader, field_data):
         """Just `bool` any ``bool`` typed FIT field unless value is `None`"""
@@ -166,25 +196,6 @@ class DefaultDataProcessor:
                     datetime.timezone.utc)
                 field_data.units = None  # units were 's', set to None
 
-    def _run_processor(self, method_name, reader, data):
-        method = self._get_method(method_name)
-        if method is None:
-            return
-
-        method(reader, data)
-
-    def _get_method(self, method_name):
-        method = self._method_cache.get(method_name, False)
-        if method is not False:
-            return method
-
-        scrubbed_method_name = scrub_method_name(method_name)
-        method = getattr(self, scrubbed_method_name, None)
-
-        self._method_cache[method_name] = method
-
-        return method
-
 
 class StandardUnitsDataProcessor(DefaultDataProcessor):
     """
@@ -196,8 +207,11 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
       (standard's default is ``m/s``)
     * Converts GPS coordinates (i.e. FIT's semicircles type) to ``deg``
 
-    .. seealso:: `DefaultDataProcessor`
+    .. seealso:: `DefaultDataProcessor`, `DataProcessorBase`
     """
+
+    def __init__(self):
+        super().__init__()
 
     def on_process_field(self, reader, field_data):
         """
