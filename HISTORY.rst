@@ -5,6 +5,15 @@ Change Log
 ==========
 
 
+v0.5.0 (2019-04-11)
+===================
+
+* Added `fitdecode.DataProcessorBase` class
+* ``check_crc`` - the parameter to `fitdecode.FitReader`'s constructor - can now
+  be either "enabled", "read-only" or "disabled" (fix #1)
+* Minor speed improvements
+
+
 v0.4.0 (2019-04-10)
 ===================
 
