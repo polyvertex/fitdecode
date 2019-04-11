@@ -394,9 +394,9 @@ class FitReader:
             message = self._read_data_message(chunk, record_header)
 
             if message.mesg_type is not None:
-                if message.mesg_type.name == 'developer_data_id':
+                if message.mesg_type.mesg_num == profile.MESG_NUM_DEVELOPER_DATA_ID:
                     self._add_dev_data_id(message)
-                elif message.mesg_type.name == 'field_description':
+                elif message.mesg_type.mesg_num == profile.MESG_NUM_FIELD_DESCRIPTION:
                     self._add_dev_field_description(message)
 
         return message

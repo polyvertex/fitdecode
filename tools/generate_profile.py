@@ -54,7 +54,11 @@ IMPORT_HEADER = '''from .types import (
 # This allows to prepend the declaration of some message numbers to the
 # generated file.
 # E.g. 'hr' -> MESG_NUM_HR = 132
-MESSAGE_NUM_DECLARATIONS = ('file_id', 'hr')
+MESSAGE_NUM_DECLARATIONS = (
+    'file_id',
+    'developer_data_id',
+    'field_description',
+    'hr')
 
 # This allows to prepend the declaration of some field numbers of specific
 # messages to the generated file.
