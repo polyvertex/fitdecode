@@ -6,6 +6,7 @@
 # This code is licensed under the MIT License.
 # See the LICENSE.txt file at the root of this project.
 
+import enum
 import io
 import os
 import struct
@@ -17,9 +18,31 @@ from . import utils
 from . import processors
 from . import profile
 
-__all__ = ['FitReader']
+__all__ = ['CrcCheck', 'FitReader']
 
 _UNSET = object()
+
+
+class CrcCheck(enum.Enum):
+    """
+    Defines the values expected by the ``check_crc`` parameter of `FitReader`'s
+    constructor.
+    """
+
+    #: CRC is not computed at all (fastest).
+    #: :class:`fitdecode.FitCRC` frame will still be yielded if present in the
+    #: source FIT stream, but with meaningless values. In which case data
+    #: processor's `fitdecode.DataProcessorBase.on_crc` method will still be
+    #: called as well.
+    DISABLED = 0
+
+    #: CRC is computed but `FitReader` will never try to match CRCs. So no
+    #: :class:`fitdecode.FitCRCError` will ever be raised.
+    READONLY = 1
+
+    #: CRC is computed and matched by `FitReader`.
+    #: :class:`fitdecode.FitCRCError` is raised upon incorrect CRC values.
+    ENABLED = 2
 
 
 class RecordHeader:
@@ -93,8 +116,15 @@ class FitReader:
     """
 
     def __init__(self, fileish, *,
-                 processor=_UNSET, check_crc=True, keep_raw_chunks=False,
-                 data_bag=_UNSET):
+                 processor=_UNSET, check_crc=CrcCheck.ENABLED,
+                 keep_raw_chunks=False, data_bag=_UNSET):
+        # backward compatibility
+        if check_crc is True:
+            check_crc = CrcCheck.ENABLED
+        elif check_crc is False:
+            check_crc = CrcCheck.DISABLED
+        assert isinstance(check_crc, CrcCheck)
+
         # modifiable options (public)
         self.check_crc = check_crc
 
@@ -268,7 +298,7 @@ class FitReader:
                 try:
                     crc_obj = self._read_crc()
                 except FitEOFError:
-                    # if not self.check_crc:
+                    # if self.check_crc != CrcCheck.ENABLED:
                     #     # There is no CRC footer in this file (or it is
                     #     # incomplete) but caller does not mind about CRC so
                     #     # we will just ignore this
@@ -331,7 +361,7 @@ class FitReader:
             else:
                 computed_crc = utils.compute_crc(chunk)
                 crc_matched = computed_crc == read_crc
-                if self.check_crc and not crc_matched:
+                if self.check_crc == CrcCheck.ENABLED and not crc_matched:
                     raise FitCRCError('invalid FIT header CRC')
 
             chunk += extra_chunk
@@ -357,8 +387,7 @@ class FitReader:
         computed_crc = self._crc
         chunk, read_crc = self._read_struct('<H')
 
-        if self.check_crc and computed_crc != read_crc:
-            # print(f'{computed_crc:#x} {read_crc:#x}')
+        if self.check_crc == CrcCheck.ENABLED and computed_crc != read_crc:
             raise FitCRCError()
 
         crc_obj = records.FitCRC(
@@ -682,7 +711,8 @@ class FitReader:
             raise FitEOFError(size, chunk_size, self._read_offset)
 
         if chunk:
-            self._crc = utils.compute_crc(chunk, crc=self._crc)
+            if self.check_crc != CrcCheck.DISABLED:
+                self._crc = utils.compute_crc(chunk, crc=self._crc)
             self._chunk_size += chunk_size
             self._read_offset += chunk_size
             self._read_size += chunk_size

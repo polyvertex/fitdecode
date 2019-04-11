@@ -123,7 +123,9 @@ def parse_args(args=None):
         help='Input .FIT file (use - for stdin)')
 
     parser.add_argument(
-        '--nocrc', action='store_const', const=True,
+        '--nocrc', action='store_const',
+        default=fitdecode.CrcCheck.ENABLED,
+        const=fitdecode.CrcCheck.DISABLED,
         help="Some devices seem to write invalid CRC's, ignore these.")
 
     parser.add_argument(
@@ -150,7 +152,7 @@ def main(args=None):
         with fitdecode.FitReader(
                 options.infile,
                 processor=fitdecode.StandardUnitsDataProcessor(),
-                check_crc=not(options.nocrc),
+                check_crc=options.nocrc,
                 keep_raw_chunks=True) as fit:
             for frame in fit:
                 if options.nodef and isinstance(
