@@ -305,5 +305,4 @@ class FitDataMessage:
                 value = self.get_value(
                     None, idx=idx, raw_value=raw_value,
                     fit_type=fit_type, py_type=py_type)
-                assert values[-1].name_or_num == field_name_or_num
                 yield value
