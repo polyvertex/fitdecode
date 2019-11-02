@@ -71,15 +71,17 @@ class FitReader:
 
         with fitdecode.FitReader(src_file) as fit:
             for frame in fit:
-                # The yielded *frame* object is of one of the following types:
+                # The yielded frame object is of one of the following types:
                 # * fitdecode.FitHeader
                 # * fitdecode.FitDefinitionMessage
                 # * fitdecode.FitDataMessage
                 # * fitdecode.FitCRC
-                #
-                # A fitdecode.FitDataMessage object contains decoded values that
-                # are directly usable in your script logic.
-                pass
+
+                if isinstance(frame, fitdecode.FitDataMessage):
+                    # Here, frame is a FitDataMessage object.
+                    # A FitDataMessage object contains decoded values that
+                    # are directly usable in your script logic.
+                    print(frame.name)
 
     Data processing:
 
