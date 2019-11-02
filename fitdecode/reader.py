@@ -494,7 +494,9 @@ class FitReader:
                 field_def_num, field_size, dev_data_index = \
                     field_unpacker.unpack(extra_chunk)
 
-                field = self._get_dev_type(dev_data_index, field_def_num)
+                field = self._get_dev_type(
+                    record_header.local_mesg_num, global_mesg_num,
+                    dev_data_index, field_def_num)
 
                 dev_field_defs.append(types.DevFieldDefinition(
                     field, dev_data_index, field_def_num, field_size))
@@ -776,12 +778,15 @@ class FitReader:
             dev_data_index, field_name, field_def_num,
             types.BASE_TYPES[base_type_id], units, native_field_num)
 
-    def _get_dev_type(self, dev_data_index, field_def_num):
+    def _get_dev_type(self, local_mesg_num, global_mesg_num, dev_data_index,
+                      field_def_num):
         if dev_data_index not in self._local_dev_types:
             raise FitParseError(
                 self._chunk_offset,
                 f'dev_data_index {dev_data_index} not defined ' +
-                f'(looking up for field {field_def_num})')
+                f'(looking up for field {field_def_num}; ' +
+                f'local_mesg_num: {local_mesg_num}; ' +
+                f'global_mesg_num: {global_mesg_num})')
 
         try:
             return self._local_dev_types[dev_data_index]['fields'][field_def_num]
@@ -789,7 +794,8 @@ class FitReader:
             raise FitParseError(
                 self._chunk_offset,
                 f'no such field {field_def_num} for dev_data_index ' +
-                f'{dev_data_index}')
+                f'{dev_data_index} (local_mesg_num: {local_mesg_num}; ' +
+                f'global_mesg_num: {global_mesg_num})')
 
     @staticmethod
     def _resolve_subfield(field, def_mesg, raw_values):
