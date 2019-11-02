@@ -5,6 +5,18 @@ Change Log
 ==========
 
 
+v0.6.0 (2019-11-02)
+===================
+
+* Added `FitReader.last_timestamp` property
+* Fixed: `FitReader` was raising `KeyError` instead of `FitParseError` when a
+  dev_type was not found
+* `FitParseError` message contains more details upon malformed file in some
+  cases
+* FIT SDK profile upgraded to v21.16
+* README's usage example slightly improved
+
+
 v0.5.0 (2019-04-11)
 ===================
 
