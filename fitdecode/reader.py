@@ -785,7 +785,7 @@ class FitReader:
 
         try:
             return self._local_dev_types[dev_data_index]['fields'][field_def_num]
-        except AttributeError:
+        except KeyError:
             raise FitParseError(
                 self._chunk_offset,
                 f'no such field {field_def_num} for dev_data_index ' +
