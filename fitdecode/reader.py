@@ -203,6 +203,20 @@ class FitReader:
         return self._header
 
     @property
+    def last_timestamp(self):
+        """
+        The last ``timestamp`` value (`int`).
+
+        Often useful in FIT files since some data fields rely on it like
+        ``timestamp_16`` and ``timestamp_ms`` for instance.
+
+        Hint: you usually want to use this property from your own processor
+        class derived from on of the processors available from
+        `fitdecode.processors`.
+        """
+        return self._last_timestamp
+
+    @property
     def file_id(self):
         """The last read ``file_id`` `FitDataMessage` object. May be `None`."""
         return self._file_id
