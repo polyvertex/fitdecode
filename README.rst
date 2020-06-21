@@ -37,6 +37,11 @@ Read a FIT file, frame by frame:
                 # are directly usable in your script logic.
                 print(frame.name)
 
+Command line utilities
+----------------------
+fitjson and fittxt export JSON and txt files::
+
+  $ fitjson in_file.fit -o out_file.json
 
 Installation
 ============
