@@ -532,33 +532,70 @@ def parse_messages(messages_rows, type_list):
     return message_list
 
 
-def get_xls_and_version_from_zip(path):
+def get_xls_and_version_from_zip_or_xlsx(path):
     archive = zipfile.ZipFile(path, 'r')
+    profile_xls = None
     profile_version = None
 
-    version_match = re.search(
-        r'Profile Version.+?(\d+\.?\d*).*',
-        archive.open('c/fit.h').read().decode(),
-    )
-    if version_match:
-        profile_version = ("%f" % float(version_match.group(1))).rstrip('0').ljust(4, '0')
-
+    # check if file is a .xlsx file
     try:
-        return archive.open('Profile.xls'), profile_version
+        archive.open('[Content_Types].xml')
+        return path, None  # yes
     except KeyError:
-        return archive.open('Profile.xlsx'), profile_version
+        pass
+
+    # old structure
+    for name in ('Profile.xlsx', 'Profile.xls'):
+        try:
+            profile_xls = archive.open(name)
+            break
+        except KeyError:
+            pass
+    else:
+        # new structure?
+        for name in archive.namelist():
+            rem = re.fullmatch(
+                r'^FitSDKRelease_(\d+(?:\.\d+)+)[/\\]Profile.xlsx?$',
+                name, re.I)
+            if rem:
+                profile_xls = archive.open(name)
+                profile_version = rem.group(1)
+                break
+        else:
+            print('Profile.xls(x) not found in', path)
+            sys.exit(1)
+
+    # read version from a C header file (old structure)
+    if profile_version is None:
+        content = archive.open('c/fit.h').read().decode()
+        rem = re.search(
+            r'\s+Profile\s+Version\s*\=\s*(\d+(?:\.\d+)+)[^\d]*',
+            content, re.I)
+        if not rem:
+            print('SDK version number not found in', path)
+            sys.exit(1)
+
+        profile_version = rem.group(1)
+
+    if profile_version.count('.') > 1 and re.fullmatch(r'.+\.0+$', profile_version):
+        profile_version = profile_version.rstrip("0").rstrip(".")
+
+    return profile_xls, profile_version
 
 
 def main(input_xls_or_zip, output_py_path=None):
     if output_py_path and os.path.exists(output_py_path):
         if not open(output_py_path, 'r').read().strip().startswith(PROFILE_HEADER_FIRST_PART):
-            print("Python file doesn't begin with appropriate header. Exiting.")
+            print('Python file does not begin with appropriate header.')
             sys.exit(1)
 
-    if open(input_xls_or_zip, 'rb').read().startswith(XLS_HEADER_MAGIC):
+    if zipfile.is_zipfile(input_xls_or_zip):
+        xls_file, profile_version = get_xls_and_version_from_zip_or_xlsx(input_xls_or_zip)
+    elif open(input_xls_or_zip, 'rb').read().startswith(XLS_HEADER_MAGIC):
         xls_file, profile_version = input_xls_or_zip, None
     else:
-        xls_file, profile_version = get_xls_and_version_from_zip(input_xls_or_zip)
+        print("Not a valid .zip or .xls(x) file.")
+        sys.exit(1)
 
     types_rows, messages_rows = parse_spreadsheet(xls_file, 'Types', 'Messages')
     type_list = parse_types(types_rows)
