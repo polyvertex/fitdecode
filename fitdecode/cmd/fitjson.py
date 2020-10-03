@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (c) Jean-Charles Lefebvre
 # SPDX-License-Identifier: MIT
 
@@ -141,7 +141,7 @@ def main(args=None):
     options = parse_args(args)
 
     frames = []
-    exception_msg = None
+
     try:
         with fitdecode.FitReader(
                 options.infile,
@@ -164,8 +164,8 @@ def main(args=None):
                 frames.append(frame)
     except Exception:
         print(
-            ('WARNING: the following error occurred while parsing FIT file. ' +
-            'Output file might be incomplete or corrupted.'),
+            'WARNING: the following error occurred while parsing FIT file. '
+            'Output file might be incomplete or corrupted.',
             file=sys.stderr)
         print('', file=sys.stderr)
         traceback.print_exc()

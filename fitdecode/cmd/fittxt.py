@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (c) Jean-Charles Lefebvre
 # SPDX-License-Identifier: MIT
 
@@ -354,8 +354,8 @@ def main(args=None):
                 frames.append(frame)
     except Exception:
         print(
-            ('WARNING: error(s) occurred while parsing FIT file. ' +
-            'See output file for more info.'),
+            'WARNING: error(s) occurred while parsing FIT file. '
+            'See output file for more info.',
             file=sys.stderr)
         exception_msg = traceback.format_exc()
 
