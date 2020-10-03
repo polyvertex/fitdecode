@@ -779,7 +779,11 @@ class FitReader:
         field_def_num = message.get_field('field_definition_number').raw_value
         base_type_id = message.get_field('fit_base_type_id').raw_value
         field_name = message.get_field('field_name').raw_value
-        units = message.get_field('units').raw_value
+
+        try:
+            units = message.get_field('units').raw_value
+        except KeyError:
+            units = None
 
         try:
             native_field_num = message.get_field('native_field_num')
