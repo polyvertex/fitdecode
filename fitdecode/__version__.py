@@ -1,10 +1,5 @@
-# fitdecode
-#
-# Copyright (c) 2018-2019 Jean-Charles Lefebvre
-# All rights reserved.
-#
-# This code is licensed under the MIT License.
-# See the LICENSE.txt file at the root of this project.
+# Copyright (c) Jean-Charles Lefebvre
+# SPDX-License-Identifier: MIT
 
 __version__ = '0.6.0'
 version_info = (0, 6, 0)
