@@ -69,7 +69,7 @@ class FitReader:
 
         import fitdecode
 
-        with fitdecode.FitReader(src_file) as fit:
+        with fitdecode.FitReader('file.fit') as fit:
             for frame in fit:
                 # The yielded frame object is of one of the following types:
                 # * fitdecode.FitHeader
@@ -421,16 +421,16 @@ class FitReader:
         chunk = self._read_bytes(1)
         if chunk[0] & 0x80:  # bit 7: compressed timestamp?
             record_header = RecordHeader(
-                is_definition=False,
-                is_developer_data=False,
-                local_mesg_num=(chunk[0] >> 5) & 0x3,  # bits 5-6
-                time_offset=chunk[0] & 0x1f)           # bits 0-4
+                False,                  # is_definition
+                False,                  # is_developer_data
+                (chunk[0] >> 5) & 0x3,  # local_mesg_num; bits 5-6
+                chunk[0] & 0x1f)        # time_offset; bits 0-4
         else:
             record_header = RecordHeader(
-                is_definition=bool(chunk[0] & 0x40),      # bit 6
-                is_developer_data=bool(chunk[0] & 0x20),  # bit 5
-                local_mesg_num=chunk[0] & 0xf,            # bits 0-3
-                time_offset=None)
+                bool(chunk[0] & 0x40),  # is_definition; bit 6
+                bool(chunk[0] & 0x20),  # is_developer_data; bit 5
+                chunk[0] & 0xf,         # local_mesg_num; bits 0-3
+                None)                   # time_offset
 
         # read record payload
         if record_header.is_definition:

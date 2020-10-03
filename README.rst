@@ -23,7 +23,7 @@ Read a FIT file, frame by frame:
 
     import fitdecode
 
-    with fitdecode.FitReader(src_file) as fit:
+    with fitdecode.FitReader('file.fit') as fit:
         for frame in fit:
             # The yielded frame object is of one of the following types:
             # * fitdecode.FitHeader
@@ -37,11 +37,13 @@ Read a FIT file, frame by frame:
                 # are directly usable in your script logic.
                 print(frame.name)
 
+
 Command line utilities
 ----------------------
 fitjson and fittxt export JSON and txt files::
 
   $ fitjson in_file.fit -o out_file.json
+
 
 Installation
 ============
