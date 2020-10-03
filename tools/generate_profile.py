@@ -585,7 +585,7 @@ def get_xls_and_version_from_zip_or_xlsx(path):
 
 def main(input_xls_or_zip, output_py_path=None):
     if output_py_path and os.path.exists(output_py_path):
-        if not open(output_py_path, 'r').read().strip().startswith(PROFILE_HEADER_FIRST_PART):
+        if not open(output_py_path, 'rb').read().strip().startswith(PROFILE_HEADER_FIRST_PART.encode()):
             print('Python file does not begin with appropriate header.')
             sys.exit(1)
 
@@ -652,7 +652,7 @@ def main(input_xls_or_zip, output_py_path=None):
     # fields to actual field objects? Would clean up accesses to these
 
     if output_py_path:
-        open(output_py_path, 'w').write(output)
+        open(output_py_path, 'wb').write(output.encode())
         print('Profile version %s written to %s' % (
             profile_version if profile_version else '<unknown>',
             output_py_path))
