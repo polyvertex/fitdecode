@@ -5,6 +5,15 @@ Change Log
 ==========
 
 
+v0.7.0 (2020-10-04)
+===================
+
+* Compatibility with Apple Watch improved (fix #10)
+* FIT SDK profile upgraded to v21.38
+* ``generate_profile`` utility now supports recent SDK file structure
+* Minor improvements and cleanup on code and documentation
+
+
 v0.6.0 (2019-11-02)
 ===================
 
