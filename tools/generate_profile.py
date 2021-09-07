@@ -7,7 +7,7 @@
 # that comes with the FIT SDK to the Python data structures in profile.py. You
 # shouldn't have to use this unless you're developing python-fitparse.
 #
-# You can download the SDK at http://www.thisisant.com/
+# You can download the SDK at https://www.thisisant.com/
 #
 # WARNING: This is only known to work with FIT SDK versions up to 5.10
 #

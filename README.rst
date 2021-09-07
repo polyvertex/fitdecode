@@ -3,14 +3,14 @@ fitdecode
 =========
 
 .. image:: https://readthedocs.org/projects/fitdecode/badge/?version=latest
-    :target: http://fitdecode.readthedocs.io/
+    :target: https://fitdecode.readthedocs.io/
     :alt: Latest Docs
 
 .. image:: https://travis-ci.org/polyvertex/fitdecode.svg
     :target: https://travis-ci.org/polyvertex/fitdecode
 
 
-A `FIT <http://www.thisisant.com>`_ file parsing and decoding library written in
+A `FIT <https://www.thisisant.com>`_ file parsing and decoding library written in
 `Python3 <https://www.python.org/>`_ (3.6+ only).
 
 
@@ -113,7 +113,7 @@ fitdecode.
 Documentation
 =============
 
-Documentation is available at `<http://fitdecode.readthedocs.io/>`_
+Documentation is available at `<https://fitdecode.readthedocs.io/>`_
 
 
 License
