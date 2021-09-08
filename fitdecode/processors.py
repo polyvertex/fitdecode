@@ -233,7 +233,7 @@ class StandardUnitsDataProcessor(DefaultDataProcessor):
 
             # record.enhanced_speed field can be a tuple...
             # see https://github.com/dtcooper/python-fitparse/issues/62
-            if isinstance(field_data.value, tuple):
+            if isinstance(field_data.value, (tuple, list)):
                 field_data.value = tuple(x * factor for x in field_data.value)
             else:
                 field_data.value *= factor

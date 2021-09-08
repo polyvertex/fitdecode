@@ -245,7 +245,7 @@ class FitReader:
         Close the file handle (constructor's *fileish*) and clear the internal
         state.
         """
-        if self._fd and hasattr(self._fd, 'close'):
+        if self._fd is not None and hasattr(self._fd, 'close'):
             self._fd.close()
 
         self._fd = None
@@ -752,6 +752,7 @@ class FitReader:
 
     def _add_dev_data_id(self, message):
         dev_data_index = message.get_field('developer_data_index').raw_value
+        dev_data_index = int(dev_data_index)
 
         try:
             application_id = message.get_field('application_id').raw_value
@@ -766,6 +767,7 @@ class FitReader:
 
     def _add_dev_field_description(self, message):
         dev_data_index = message.get_field('developer_data_index').raw_value
+        dev_data_index = int(dev_data_index)
         if dev_data_index not in self._local_dev_types:
             raise FitParseError(
                 self._chunk_offset,
