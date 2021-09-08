@@ -5,6 +5,7 @@ import enum
 import io
 import os
 import struct
+import warnings
 
 from .exceptions import FitHeaderError, FitCRCError, FitEOFError, FitParseError
 from . import records
@@ -13,7 +14,7 @@ from . import utils
 from . import processors
 from . import profile
 
-__all__ = ['CrcCheck', 'FitReader']
+__all__ = ['CrcCheck', 'DevTypesCheck', 'FitReader']
 
 _UNSET = object()
 
@@ -38,6 +39,29 @@ class CrcCheck(enum.Enum):
     #: CRC is computed and matched by `FitReader`.
     #: :class:`fitdecode.FitCRCError` is raised upon incorrect CRC values.
     ENABLED = 2
+
+
+class DevTypesCheck(enum.Enum):
+    """
+    Defines the values expected by the ``check_devtypes`` parameter of
+    `FitReader`'s constructor.
+    """
+
+    #: Disable dev types checking. If a FIT source contains a
+    #: `FitDefinitionMessage` that references an undefined so-called *developer
+    #: type* (or an undefined field), `FitReader` silently ignore the error and
+    #: defaults to ``BYTE`` for the subsequent `FitDataMessage` frames that rely
+    #: on this definition.
+    IGNORE = 0
+
+    #: Same behavior as `DISABLED` but `FitReader` emits a warning with
+    #: `warnings.warn`
+    WARN = 1
+
+    #: Strict mode (**default**). `FitReader` raises a `FitParseError` exception
+    #: when a FIT source contains a `FitDefinitionMessage` that references an
+    #: undefined *developer type* (or field).
+    RAISE = 2
 
 
 class RecordHeader:
@@ -114,16 +138,20 @@ class FitReader:
 
     def __init__(self, fileish, *,
                  processor=_UNSET, check_crc=CrcCheck.ENABLED,
-                 keep_raw_chunks=False, data_bag=_UNSET):
+                 check_devtypes=DevTypesCheck.WARN, keep_raw_chunks=False,
+                 data_bag=_UNSET):
         # backward compatibility
         if check_crc is True:
             check_crc = CrcCheck.ENABLED
         elif check_crc is False:
             check_crc = CrcCheck.DISABLED
+
         assert isinstance(check_crc, CrcCheck)
+        assert isinstance(check_devtypes, DevTypesCheck)
 
         # modifiable options (public)
         self.check_crc = check_crc
+        self.check_devtypes = check_devtypes
 
         # state (public)
         #: the *data_bag* object that was passed to the constructor, or, by
@@ -760,6 +788,9 @@ class FitReader:
             application_id = None
 
         # declare/overwrite type
+        self._add_dev_data_id_impl(dev_data_index, application_id)
+
+    def _add_dev_data_id_impl(self, dev_data_index, application_id=None):
         self._local_dev_types[dev_data_index] = {
             'dev_data_index': dev_data_index,
             'application_id': application_id,
@@ -788,31 +819,62 @@ class FitReader:
         except KeyError:
             native_field_num = None
 
-        fields = self._local_dev_types[int(dev_data_index)]['fields']
-
         # declare/overwrite type
-        fields[field_def_num] = types.DevField(
-            dev_data_index, field_name, field_def_num,
-            types.BASE_TYPES[base_type_id], units, native_field_num)
+        self._add_dev_field_description_impl(
+            dev_data_index, field_def_num, types.BASE_TYPES[base_type_id],
+            field_name, units, native_field_num)
+
+    def _add_dev_field_description_impl(self, dev_data_index, field_def_num,
+                                        base_type=types.BASE_TYPE_BYTE,
+                                        name=None, units=None,
+                                        native_field_num=None):
+        self._local_dev_types[dev_data_index]['fields'][field_def_num] = \
+            types.DevField(
+                dev_data_index, name, field_def_num, base_type, units,
+                native_field_num)
 
     def _get_dev_type(self, local_mesg_num, global_mesg_num, dev_data_index,
                       field_def_num):
-        if dev_data_index not in self._local_dev_types:
-            raise FitParseError(
-                self._chunk_offset,
+        try:
+            dev_type = self._local_dev_types[dev_data_index]
+        except KeyError:
+            msg = (
                 f'dev_data_index {dev_data_index} not defined ' +
                 f'(looking up for field {field_def_num}; ' +
                 f'local_mesg_num: {local_mesg_num}; ' +
                 f'global_mesg_num: {global_mesg_num})')
 
+            if self.check_devtypes is DevTypesCheck.RAISE:
+                raise FitParseError(self._chunk_offset, msg)
+            elif self.check_devtypes is DevTypesCheck.WARN:
+                msg += "; adding dummy type..."
+                warnings.warn(msg)
+            else:
+                assert self.check_devtypes is DevTypesCheck.IGNORE
+
+            self._add_dev_data_id_impl(dev_data_index)
+            dev_type = self._local_dev_types[dev_data_index]
+
         try:
-            return self._local_dev_types[dev_data_index]['fields'][field_def_num]
+            return dev_type['fields'][field_def_num]
         except KeyError:
-            raise FitParseError(
-                self._chunk_offset,
+            msg = (
                 f'no such field {field_def_num} for dev_data_index ' +
                 f'{dev_data_index} (local_mesg_num: {local_mesg_num}; ' +
                 f'global_mesg_num: {global_mesg_num})')
+
+            if self.check_devtypes is DevTypesCheck.RAISE:
+                raise FitParseError(self._chunk_offset, msg)
+            elif self.check_devtypes is DevTypesCheck.WARN:
+                msg += "; defaulting to BYTE field type..."
+                warnings.warn(msg)
+            else:
+                assert self.check_devtypes is DevTypesCheck.IGNORE
+
+            self._add_dev_field_description_impl(
+                dev_data_index, field_def_num)
+
+            return self._local_dev_types[dev_data_index]['fields'][field_def_num]
 
     @staticmethod
     def _resolve_subfield(field, def_mesg, raw_values):
