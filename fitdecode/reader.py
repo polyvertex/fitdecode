@@ -14,7 +14,7 @@ from . import utils
 from . import processors
 from . import profile
 
-__all__ = ['CrcCheck', 'DevTypesCheck', 'FitReader']
+__all__ = ['CrcCheck', 'ErrorHandling', 'FitReader']
 
 _UNSET = object()
 
@@ -41,26 +41,27 @@ class CrcCheck(enum.Enum):
     ENABLED = 2
 
 
-class DevTypesCheck(enum.Enum):
+class ErrorHandling(enum.Enum):
     """
-    Defines the values expected by the ``check_devtypes`` parameter of
+    Defines the values expected by the ``error_handling`` parameter of
     `FitReader`'s constructor.
     """
 
-    #: Disable dev types checking. If a FIT source contains a
-    #: `FitDefinitionMessage` that references an undefined so-called *developer
-    #: type* (or an undefined field), `FitReader` silently ignore the error and
-    #: defaults to ``BYTE`` for the subsequent `FitDataMessage` frames that rely
-    #: on this definition.
+    #: Disable developer types checking and other parsing error due to malformed
+    #: FIT data. Parser proceeds when possible.
+    #:
+    #: For instance, if a `FitDefinitionMessage` references an undefined
+    #: so-called *developer type* (or an undefined field), `FitReader` will
+    #: silently ignore the error and will default to ``BYTE`` for the subsequent
+    #: `FitDataMessage` frames that rely on this definition.
     IGNORE = 0
 
     #: Default behavior. Same as `DISABLED` but `FitReader` emits a warning with
-    #: `warnings.warn`
+    #: `warnings.warn`.
     WARN = 1
 
-    #: Strict mode (**default**). `FitReader` raises a `FitParseError` exception
-    #: when a FIT source contains a `FitDefinitionMessage` that references an
-    #: undefined *developer type* (or field).
+    #: Strict mode. `FitReader` raises a `FitParseError` exception when
+    #: malformed data is found, thus stopping the parsing of the current stream.
     RAISE = 2
 
 
@@ -138,7 +139,7 @@ class FitReader:
 
     def __init__(
             self, fileish, *, processor=_UNSET, check_crc=CrcCheck.ENABLED,
-            check_devtypes=DevTypesCheck.WARN, keep_raw_chunks=False,
+            error_handling=ErrorHandling.WARN, keep_raw_chunks=False,
             data_bag=_UNSET):
         # backward compatibility
         if check_crc is True:
@@ -147,11 +148,11 @@ class FitReader:
             check_crc = CrcCheck.DISABLED
 
         assert isinstance(check_crc, CrcCheck)
-        assert isinstance(check_devtypes, DevTypesCheck)
+        assert isinstance(error_handling, ErrorHandling)
 
         # modifiable options (public)
         self.check_crc = check_crc
-        self.check_devtypes = check_devtypes
+        self.error_handling = error_handling
 
         # state (public)
         #: the *data_bag* object that was passed to the constructor, or, by
@@ -505,11 +506,19 @@ class FitReader:
                 #   https://github.com/polyvertex/fitdecode/issues/13
                 #   https://github.com/dtcooper/python-fitparse/pull/116
                 #   https://github.com/GoldenCheetah/GoldenCheetah/issues/3645
-                base_type = types.BASE_TYPE_BYTE
-                warnings.warn(
+                msg = (
                     f'invalid field size {field_size} @ {self._chunk_offset} '
                     f'for type {base_type.name} (expected a multiple of '
                     f'{base_type.size})')
+
+                if self.error_handling is ErrorHandling.RAISE:
+                    raise FitParseError(self._chunk_offset, msg)
+                elif self.error_handling is ErrorHandling.WARN:
+                    warnings.warn(msg)
+                else:
+                    assert self.error_handling is ErrorHandling.IGNORE
+
+                base_type = types.BASE_TYPE_BYTE
 
             # if the field has components that are accumulators,
             # start recording their accumulation at 0
@@ -849,13 +858,13 @@ class FitReader:
                 f'{field_def_num}; local_mesg_num: {local_mesg_num}; '
                 f'global_mesg_num: {global_mesg_num})')
 
-            if self.check_devtypes is DevTypesCheck.RAISE:
+            if self.error_handling is ErrorHandling.RAISE:
                 raise FitParseError(self._chunk_offset, msg)
-            elif self.check_devtypes is DevTypesCheck.WARN:
+            elif self.error_handling is ErrorHandling.WARN:
                 msg += '; adding dummy type...'
                 warnings.warn(msg)
             else:
-                assert self.check_devtypes is DevTypesCheck.IGNORE
+                assert self.error_handling is ErrorHandling.IGNORE
 
             self._add_dev_data_id_impl(dev_data_index)
             dev_type = self._local_dev_types[dev_data_index]
@@ -868,13 +877,13 @@ class FitReader:
                 f'{dev_data_index} @ {self._chunk_offset} (local_mesg_num: '
                 f'{local_mesg_num}; global_mesg_num: {global_mesg_num})')
 
-            if self.check_devtypes is DevTypesCheck.RAISE:
+            if self.error_handling is ErrorHandling.RAISE:
                 raise FitParseError(self._chunk_offset, msg)
-            elif self.check_devtypes is DevTypesCheck.WARN:
+            elif self.error_handling is ErrorHandling.WARN:
                 msg += '; defaulting to BYTE field type...'
                 warnings.warn(msg)
             else:
-                assert self.check_devtypes is DevTypesCheck.IGNORE
+                assert self.error_handling is ErrorHandling.IGNORE
 
             self._add_dev_field_description_impl(
                 dev_data_index, field_def_num)
