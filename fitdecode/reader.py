@@ -338,7 +338,7 @@ class FitReader:
                 try:
                     crc_obj = self._read_crc()
                 except FitEOFError:
-                    # if self.check_crc != CrcCheck.ENABLED:
+                    # if self.check_crc is not CrcCheck.ENABLED:
                     #     # There is no CRC footer in this file (or it is
                     #     # incomplete) but caller does not mind about CRC so
                     #     # we will just ignore this
@@ -401,7 +401,7 @@ class FitReader:
             else:
                 computed_crc = utils.compute_crc(chunk)
                 crc_matched = computed_crc == read_crc
-                if self.check_crc == CrcCheck.ENABLED and not crc_matched:
+                if self.check_crc is CrcCheck.ENABLED and not crc_matched:
                     raise FitCRCError('invalid FIT header CRC')
 
             chunk += extra_chunk
@@ -427,7 +427,7 @@ class FitReader:
         computed_crc = self._crc
         chunk, read_crc = self._read_struct('<H')
 
-        if self.check_crc == CrcCheck.ENABLED and computed_crc != read_crc:
+        if self.check_crc is CrcCheck.ENABLED and computed_crc != read_crc:
             raise FitCRCError()
 
         crc_obj = records.FitCRC(
@@ -766,7 +766,7 @@ class FitReader:
             raise FitEOFError(size, chunk_size, self._read_offset)
 
         if chunk:
-            if self.check_crc != CrcCheck.DISABLED:
+            if self.check_crc is not CrcCheck.DISABLED:
                 self._crc = utils.compute_crc(chunk, crc=self._crc)
             self._chunk_size += chunk_size
             self._read_offset += chunk_size
