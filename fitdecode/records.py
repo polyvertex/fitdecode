@@ -33,8 +33,9 @@ class FitHeader:
         'header_size', 'proto_ver', 'profile_ver', 'body_size',
         'crc', 'crc_matched', 'chunk')
 
-    def __init__(self, header_size, proto_ver, profile_ver, body_size,
-                 crc, crc_matched, chunk):
+    def __init__(
+            self, header_size, proto_ver, profile_ver, body_size, crc,
+            crc_matched, chunk):
         self.header_size = header_size
         self.proto_ver = proto_ver
         self.profile_ver = profile_ver
@@ -73,9 +74,9 @@ class FitDefinitionMessage:
 
         'chunk')
 
-    def __init__(self, is_developer_data, local_mesg_num, time_offset,
-                 mesg_type, global_mesg_num, endian, field_defs, dev_field_defs,
-                 chunk):
+    def __init__(
+            self, is_developer_data, local_mesg_num, time_offset, mesg_type,
+            global_mesg_num, endian, field_defs, dev_field_defs, chunk):
         self.is_developer_data = is_developer_data
         self.local_mesg_num = local_mesg_num
         self.time_offset = time_offset
@@ -113,8 +114,9 @@ class FitDataMessage:
         'fields',
         'chunk')
 
-    def __init__(self, is_developer_data, local_mesg_num, time_offset, def_mesg,
-                 fields, chunk):
+    def __init__(
+            self, is_developer_data, local_mesg_num, time_offset, def_mesg,
+            fields, chunk):
         self.is_developer_data = is_developer_data  #: Is this a "developer" message?
         self.local_mesg_num = local_mesg_num  #: The **local** definition number of this message
         self.time_offset = time_offset  #: Time offset in case header was compressed. `None` otherwise.
@@ -181,7 +183,7 @@ class FitDataMessage:
                     return field
 
         raise KeyError(
-            f'field "{field_name_or_num}" (idx #{idx}) not found in ' +
+            f'field "{field_name_or_num}" (idx #{idx}) not found in '
             f'message "{self.name}"')
 
     def get_fields(self, field_name_or_num):
@@ -195,9 +197,9 @@ class FitDataMessage:
             if field.is_named(field_name_or_num):
                 yield field
 
-    def get_value(self, field_name_or_num, *,
-                  idx=0, fallback=_UNSET, raw_value=False,
-                  fit_type=None, py_type=_UNSET):
+    def get_value(
+            self, field_name_or_num, *, idx=0, fallback=_UNSET, raw_value=False,
+            fit_type=None, py_type=_UNSET):
         """
         Get the value (or raw_value) of a field specified by its name or its
         definition number (*field_name_or_num*), with optional type checking.
@@ -254,15 +256,15 @@ class FitDataMessage:
         if not field_data:
             if fallback is _UNSET:
                 raise KeyError(
-                    f'field "{field_name_or_num}" (idx #{idx}) not found in ' +
+                    f'field "{field_name_or_num}" (idx #{idx}) not found in '
                     f'message "{self.name}"')
             return fallback
 
         # check FIT type if needed
         if fit_type and field_data.type.name != fit_type:
             raise TypeError(
-                'unexpected type for FIT field ' +
-                f'"{self.name}.{field_name_or_num}" (idx #{idx}; ' +
+                'unexpected type for FIT field '
+                f'"{self.name}.{field_name_or_num}" (idx #{idx}; '
                 f'got {field_data.type.name} instead of {fit_type})')
 
         # pick the right property
@@ -276,14 +278,15 @@ class FitDataMessage:
                 py_type_str = str(type(py_type))
 
             raise TypeError(
-                'unexpected type for FIT value ' +
-                f'"{self.name}.{field_name_or_num}" (idx #{idx}; ' +
+                'unexpected type for FIT value '
+                f'"{self.name}.{field_name_or_num}" (idx #{idx}; '
                 f'got {type(value)} instead of {py_type_str})')
 
         return value
 
-    def get_values(self, field_name_or_num, *,
-                   raw_value=False, fit_type=None, py_type=_UNSET):
+    def get_values(
+            self, field_name_or_num, *, raw_value=False, fit_type=None,
+            py_type=_UNSET):
         """
         Like `get_value` but **yield** every value of all the fields that match
         *field_name_or_num* - i.e. generator.

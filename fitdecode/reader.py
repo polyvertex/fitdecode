@@ -136,10 +136,10 @@ class FitReader:
 
     """
 
-    def __init__(self, fileish, *,
-                 processor=_UNSET, check_crc=CrcCheck.ENABLED,
-                 check_devtypes=DevTypesCheck.WARN, keep_raw_chunks=False,
-                 data_bag=_UNSET):
+    def __init__(
+            self, fileish, *, processor=_UNSET, check_crc=CrcCheck.ENABLED,
+            check_devtypes=DevTypesCheck.WARN, keep_raw_chunks=False,
+            data_bag=_UNSET):
         # backward compatibility
         if check_crc is True:
             check_crc = CrcCheck.ENABLED
@@ -476,8 +476,8 @@ class FitReader:
         extra_chunk = self._read_bytes(5)
         record_chunks.append(extra_chunk)
         endian = '<' if not extra_chunk[1] else '>'
-        global_mesg_num, num_fields = struct.unpack(endian + '2xHB',
-                                                    extra_chunk)
+        global_mesg_num, num_fields = struct.unpack(
+            endian + '2xHB', extra_chunk)
 
         # get global message's declaration from our profile if any
         mesg_type = profile.MESSAGE_TYPES.get(global_mesg_num)
@@ -502,8 +502,8 @@ class FitReader:
                 # should we fall back to byte encoding instead?
                 raise FitParseError(
                     self._chunk_offset,
-                    f'invalid field size {field_size} for type ' +
-                    f'{base_type.name} (expected a multiple of ' +
+                    f'invalid field size {field_size} for type '
+                    f'{base_type.name} (expected a multiple of '
                     f'{base_type.size})')
 
             # if the field has components that are accumulators,
@@ -824,30 +824,30 @@ class FitReader:
             dev_data_index, field_def_num, types.BASE_TYPES[base_type_id],
             field_name, units, native_field_num)
 
-    def _add_dev_field_description_impl(self, dev_data_index, field_def_num,
-                                        base_type=types.BASE_TYPE_BYTE,
-                                        name=None, units=None,
-                                        native_field_num=None):
+    def _add_dev_field_description_impl(
+            self, dev_data_index, field_def_num, base_type=types.BASE_TYPE_BYTE,
+            name=None, units=None, native_field_num=None):
         self._local_dev_types[dev_data_index]['fields'][field_def_num] = \
             types.DevField(
                 dev_data_index, name, field_def_num, base_type, units,
                 native_field_num)
 
-    def _get_dev_type(self, local_mesg_num, global_mesg_num, dev_data_index,
-                      field_def_num):
+    def _get_dev_type(
+            self, local_mesg_num, global_mesg_num, dev_data_index,
+            field_def_num):
         try:
             dev_type = self._local_dev_types[dev_data_index]
         except KeyError:
             msg = (
-                f'dev_data_index {dev_data_index} not defined ' +
-                f'(looking up for field {field_def_num}; ' +
-                f'local_mesg_num: {local_mesg_num}; ' +
+                f'dev_data_index {dev_data_index} not defined '
+                f'(looking up for field {field_def_num}; '
+                f'local_mesg_num: {local_mesg_num}; '
                 f'global_mesg_num: {global_mesg_num})')
 
             if self.check_devtypes is DevTypesCheck.RAISE:
                 raise FitParseError(self._chunk_offset, msg)
             elif self.check_devtypes is DevTypesCheck.WARN:
-                msg += "; adding dummy type..."
+                msg += '; adding dummy type...'
                 warnings.warn(msg)
             else:
                 assert self.check_devtypes is DevTypesCheck.IGNORE
@@ -859,14 +859,14 @@ class FitReader:
             return dev_type['fields'][field_def_num]
         except KeyError:
             msg = (
-                f'no such field {field_def_num} for dev_data_index ' +
-                f'{dev_data_index} (local_mesg_num: {local_mesg_num}; ' +
+                f'no such field {field_def_num} for dev_data_index '
+                f'{dev_data_index} (local_mesg_num: {local_mesg_num}; '
                 f'global_mesg_num: {global_mesg_num})')
 
             if self.check_devtypes is DevTypesCheck.RAISE:
                 raise FitParseError(self._chunk_offset, msg)
             elif self.check_devtypes is DevTypesCheck.WARN:
-                msg += "; defaulting to BYTE field type..."
+                msg += '; defaulting to BYTE field type...'
                 warnings.warn(msg)
             else:
                 assert self.check_devtypes is DevTypesCheck.IGNORE

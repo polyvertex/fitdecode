@@ -306,7 +306,7 @@ def parse_args(args=None):
     parser.add_argument(
         '-f', '--filter', action='append',
         help=(
-            'Message name(s) (or global numbers) to filter-in ' +
+            'Message name(s) (or global numbers) to filter-in '
             '(other messages are then ignored).'))
 
     options = parser.parse_args(args)

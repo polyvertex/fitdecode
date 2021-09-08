@@ -70,7 +70,7 @@ def get_mesg_field(mesg_name_or_num, field_name_or_num):
             return field
 
     raise ValueError(
-        f'field "{field_name_or_num}" not found in ' +
+        f'field "{field_name_or_num}" not found in '
         f'message "{mesg_name_or_num}"')
 
 
