@@ -40,9 +40,12 @@ Read a FIT file, frame by frame:
 
 Command line utilities
 ----------------------
-fitjson and fittxt export JSON and txt files::
 
-  $ fitjson in_file.fit -o out_file.json
+``fitjson`` and ``fittxt`` export JSON and txt files:
+
+::
+
+    $ fitjson in_file.fit -o out_file.json
 
 
 Installation
@@ -76,15 +79,14 @@ optimize both speed and memory usage.
 
 Main differences between fitdecode and fitparse:
 
+* fitdecode's API is not compatible with fitparse's
+
 * fitdecode requires Python version 3.6 or greater
 
 * fitdecode is faster
 
 * fitdecode allows concurrent reading of multiple files by being thread-safe, in
   the sense that fitdecode's objects keep their state stored locally
-
-* fitdecode high-level interface - FitReader - is not compatible with fitparse's
-  FitFile
 
 * fitdecode does not discard the FIT header and the CRC footer while iterating
   a file, which allow to get a complete 1:1 representation of the file that is
@@ -93,8 +95,8 @@ Main differences between fitdecode and fitparse:
 * This also allows the client to easily deal with so-called chained FIT files,
   as per FIT SDK definition (i.e. concatenated FIT files)
 
-* CRC computation and matching are both optional. CRC can be matched, only
-  computed, or fully ignored for faster reading.
+* CRC computation and matching are both optional. CRC can be either matched, or
+  only computed, or just ignored for faster reading.
 
 * fitdecode offers optional access to records, headers and footers in their
   binary form, to allow FIT file cutting, stitching and filtering at binary
