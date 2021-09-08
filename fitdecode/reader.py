@@ -54,7 +54,7 @@ class DevTypesCheck(enum.Enum):
     #: on this definition.
     IGNORE = 0
 
-    #: Same behavior as `DISABLED` but `FitReader` emits a warning with
+    #: Default behavior. Same as `DISABLED` but `FitReader` emits a warning with
     #: `warnings.warn`
     WARN = 1
 
@@ -845,8 +845,8 @@ class FitReader:
         except KeyError:
             msg = (
                 f'dev_data_index {dev_data_index} not defined '
-                f'(looking up for field {field_def_num}; '
-                f'local_mesg_num: {local_mesg_num}; '
+                f'@ {self._chunk_offset} (looking up for field '
+                f'{field_def_num}; local_mesg_num: {local_mesg_num}; '
                 f'global_mesg_num: {global_mesg_num})')
 
             if self.check_devtypes is DevTypesCheck.RAISE:
@@ -865,8 +865,8 @@ class FitReader:
         except KeyError:
             msg = (
                 f'no such field {field_def_num} for dev_data_index '
-                f'{dev_data_index} (local_mesg_num: {local_mesg_num}; '
-                f'global_mesg_num: {global_mesg_num})')
+                f'{dev_data_index} @ {self._chunk_offset} (local_mesg_num: '
+                f'{local_mesg_num}; global_mesg_num: {global_mesg_num})')
 
             if self.check_devtypes is DevTypesCheck.RAISE:
                 raise FitParseError(self._chunk_offset, msg)
