@@ -375,7 +375,7 @@ class FitReader:
                 # regular EOF: storage is empty or previous "FIT file" ended
                 # normally
                 return
-            raise FitHeaderError('file too small (' + str(exc) + ')')
+            raise FitHeaderError(f'file too small ({exc})')
 
         # check header size
         if header_size < len(chunk) or header_magic != b'.FIT':
@@ -478,12 +478,12 @@ class FitReader:
         record_chunks.append(extra_chunk)
         endian = '<' if not extra_chunk[1] else '>'
         global_mesg_num, num_fields = struct.unpack(
-            endian + '2xHB', extra_chunk)
+            f'{endian}2xHB', extra_chunk)
 
         # get global message's declaration from our profile if any
         mesg_type = profile.MESSAGE_TYPES.get(global_mesg_num)
 
-        field_unpacker = struct.Struct(endian + '3B')
+        field_unpacker = struct.Struct(f'{endian}3B')
         field_defs = []
         dev_field_defs = []
 
@@ -717,9 +717,9 @@ class FitReader:
 
             # struct format to read "[N]" base types
             unpacker = struct.Struct(
-                def_mesg.endian +
-                str(int(field_def.size / base_type.size)) +
-                base_type.fmt)
+                f'{def_mesg.endian}'
+                f'{int(field_def.size / base_type.size)}'
+                f'{base_type.fmt}')
 
             # read the chunk
             chunk = self._read_bytes(unpacker.size)

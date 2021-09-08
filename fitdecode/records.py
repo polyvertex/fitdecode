@@ -92,7 +92,7 @@ class FitDefinitionMessage:
         if self.mesg_type:
             return self.mesg_type.name
         else:
-            return 'unknown_' + str(self.global_mesg_num)
+            return f'unknown_{self.global_mesg_num}'
 
     @property
     def all_field_defs(self):
@@ -227,7 +227,10 @@ class FitDataMessage:
 
         .. seealso:: `get_values`, `get_field`, `get_fields`, `has_field`
         """
-        assert fit_type in (_UNSET, None) or isinstance(fit_type, str)
+        assert (
+            fit_type is _UNSET or
+            fit_type is None or
+            isinstance(fit_type, str))
 
         field_data = None
 
@@ -239,7 +242,7 @@ class FitDataMessage:
                 # change the representation of idx so that its meaning can be
                 # differentiated in case an exception is raised and it has to be
                 # printed later on
-                idx = '[' + str(idx) + ']'
+                idx = f'[{idx}]'
             except KeyError:
                 # KeyError exception is handled below so that the *fallback*
                 # argument can be honored

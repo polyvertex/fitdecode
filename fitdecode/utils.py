@@ -148,20 +148,34 @@ def blocking_read(istream, size=-1, nonblocking_reads_delay=0.06):
     before trying to read from *istream* again in case `BlockingIOError` has
     been raised during previous call.
     """
+    assert size is None or (isinstance(size, int) and not isinstance(size, bool))
+
     if not size:
         return None
 
-    data = b''
+    output = []
+    len_read = 0
+
+    def _join():
+        glue = '' if isinstance(output[0], str) else b''
+        return glue.join(output)
+
     while True:
         try:
-            chunk = istream.read(-1 if size < 0 else size - len(data))
+            chunk = istream.read(-1 if size < 0 else size - len_read)
 
-            if not data:
-                data = chunk
+            if size < 0:
+                return chunk
+            elif not chunk:
+                if not output:
+                    return chunk
+                else:
+                    return _join()
             else:
-                data += chunk
-
-            if not chunk or (size > 0 and len(data) >= size):
-                return data
+                assert size > 0
+                output.append(chunk)
+                len_read += len(chunk)
+                if len_read >= size:
+                    return _join()
         except BlockingIOError:
             time.sleep(nonblocking_reads_delay)
