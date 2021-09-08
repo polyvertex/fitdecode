@@ -499,11 +499,16 @@ class FitReader:
                 base_type_num, types.BASE_TYPE_BYTE)
 
             if (field_size % base_type.size) != 0:
-                # should we fall back to byte encoding instead?
-                raise FitParseError(
-                    self._chunk_offset,
-                    f'invalid field size {field_size} for type '
-                    f'{base_type.name} (expected a multiple of '
+                # should we fall back to byte encoding instead raising a
+                # FitParseError?
+                # well, apparently yes:
+                #   https://github.com/polyvertex/fitdecode/issues/13
+                #   https://github.com/dtcooper/python-fitparse/pull/116
+                #   https://github.com/GoldenCheetah/GoldenCheetah/issues/3645
+                base_type = types.BASE_TYPE_BYTE
+                warnings.warn(
+                    f'invalid field size {field_size} @ {self._chunk_offset} '
+                    f'for type {base_type.name} (expected a multiple of '
                     f'{base_type.size})')
 
             # if the field has components that are accumulators,
