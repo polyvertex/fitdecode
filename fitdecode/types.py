@@ -364,20 +364,20 @@ BASE_TYPE_BYTE = BaseType(
 
 
 BASE_TYPES = {
-    0x00: BaseType(name='enum', identifier=0x00, fmt='B', parse=lambda x: None if x == 0xff else x),
-    0x01: BaseType(name='sint8', identifier=0x01, fmt='b', parse=lambda x: None if x == 0x7f else x),
-    0x02: BaseType(name='uint8', identifier=0x02, fmt='B', parse=lambda x: None if x == 0xff else x),
-    0x83: BaseType(name='sint16', identifier=0x83, fmt='h', parse=lambda x: None if x == 0x7fff else x),
-    0x84: BaseType(name='uint16', identifier=0x84, fmt='H', parse=lambda x: None if x == 0xffff else x),
-    0x85: BaseType(name='sint32', identifier=0x85, fmt='i', parse=lambda x: None if x == 0x7fffffff else x),
-    0x86: BaseType(name='uint32', identifier=0x86, fmt='I', parse=lambda x: None if x == 0xffffffff else x),
+    0x00: BaseType(name='enum', identifier=0x00, fmt='B', parse=lambda x: None if x == 0xff else x),  # noqa
+    0x01: BaseType(name='sint8', identifier=0x01, fmt='b', parse=lambda x: None if x == 0x7f else x),  # noqa
+    0x02: BaseType(name='uint8', identifier=0x02, fmt='B', parse=lambda x: None if x == 0xff else x),  # noqa
+    0x83: BaseType(name='sint16', identifier=0x83, fmt='h', parse=lambda x: None if x == 0x7fff else x),  # noqa
+    0x84: BaseType(name='uint16', identifier=0x84, fmt='H', parse=lambda x: None if x == 0xffff else x),  # noqa
+    0x85: BaseType(name='sint32', identifier=0x85, fmt='i', parse=lambda x: None if x == 0x7fffffff else x),  # noqa
+    0x86: BaseType(name='uint32', identifier=0x86, fmt='I', parse=lambda x: None if x == 0xffffffff else x),  # noqa
     0x07: BaseType(name='string', identifier=0x07, fmt='s', parse=parse_string),
-    0x88: BaseType(name='float32', identifier=0x88, fmt='f', parse=lambda x: None if math.isnan(x) else x),
-    0x89: BaseType(name='float64', identifier=0x89, fmt='d', parse=lambda x: None if math.isnan(x) else x),
-    0x0a: BaseType(name='uint8z', identifier=0x0a, fmt='B', parse=lambda x: None if x == 0 else x),
-    0x8b: BaseType(name='uint16z', identifier=0x8b, fmt='H', parse=lambda x: None if x == 0 else x),
-    0x8c: BaseType(name='uint32z', identifier=0x8c, fmt='I', parse=lambda x: None if x == 0 else x),
+    0x88: BaseType(name='float32', identifier=0x88, fmt='f', parse=lambda x: None if math.isnan(x) else x),  # noqa
+    0x89: BaseType(name='float64', identifier=0x89, fmt='d', parse=lambda x: None if math.isnan(x) else x),  # noqa
+    0x0a: BaseType(name='uint8z', identifier=0x0a, fmt='B', parse=lambda x: None if x == 0 else x),  # noqa
+    0x8b: BaseType(name='uint16z', identifier=0x8b, fmt='H', parse=lambda x: None if x == 0 else x),  # noqa
+    0x8c: BaseType(name='uint32z', identifier=0x8c, fmt='I', parse=lambda x: None if x == 0 else x),  # noqa
     0x0d: BASE_TYPE_BYTE,
-    0x8e: BaseType(name='sint64', identifier=0x8e, fmt='q', parse=lambda x: None if x == 0x7fffffffffffffff else x),
-    0x8f: BaseType(name='uint64', identifier=0x8f, fmt='Q', parse=lambda x: None if x == 0xffffffffffffffff else x),
-    0x90: BaseType(name='uint64z', identifier=0x90, fmt='Q', parse=lambda x: None if x == 0 else x)}
+    0x8e: BaseType(name='sint64', identifier=0x8e, fmt='q', parse=lambda x: None if x == 0x7fffffffffffffff else x),  # noqa
+    0x8f: BaseType(name='uint64', identifier=0x8f, fmt='Q', parse=lambda x: None if x == 0xffffffffffffffff else x),  # noqa
+    0x90: BaseType(name='uint64z', identifier=0x90, fmt='Q', parse=lambda x: None if x == 0 else x)}  # noqa

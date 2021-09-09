@@ -42,7 +42,7 @@ class FitHeader:
         self.body_size = body_size
         self.crc = crc  #: may be null
         self.crc_matched = crc_matched
-        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
+        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)  # noqa
 
 
 class FitCRC:
@@ -53,7 +53,7 @@ class FitCRC:
     def __init__(self, crc, matched, chunk):
         self.crc = crc
         self.matched = matched
-        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
+        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)  # noqa
 
 
 class FitDefinitionMessage:
@@ -85,7 +85,8 @@ class FitDefinitionMessage:
         self.endian = endian
         self.field_defs = field_defs  #: list of `FieldDefinition`
         self.dev_field_defs = dev_field_defs  #: list of `DevFieldDefinition`
-        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
+        #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
+        self.chunk = chunk
 
     @property
     def name(self):
@@ -117,12 +118,23 @@ class FitDataMessage:
     def __init__(
             self, is_developer_data, local_mesg_num, time_offset, def_mesg,
             fields, chunk):
-        self.is_developer_data = is_developer_data  #: Is this a "developer" message?
-        self.local_mesg_num = local_mesg_num  #: The **local** definition number of this message
-        self.time_offset = time_offset  #: Time offset in case header was compressed. `None` otherwise.
-        self.def_mesg = def_mesg  #: `FitDefinitionMessage`
-        self.fields = fields  #: list of `FieldData`
-        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
+        #: Is this a "developer" message?
+        self.is_developer_data = is_developer_data
+
+        #: The **local** definition number of this message
+        self.local_mesg_num = local_mesg_num
+
+        #: Time offset in case header was compressed. `None` otherwise.
+        self.time_offset = time_offset
+
+        #: `FitDefinitionMessage`
+        self.def_mesg = def_mesg
+
+        #: list of `FieldData`
+        self.fields = fields
+
+        #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
+        self.chunk = chunk
 
     def __iter__(self):
         """Iterate over the `FieldData` object in this mesage"""

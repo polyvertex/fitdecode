@@ -172,18 +172,18 @@ class FitReader:
         self._read_size = 0    # count bytes read from this file so far in total
 
         # per-chunk state (private)
-        self._chunk_index = 0   # the index number of the current chunk that is currently being read
-        self._chunk_offset = 0  # the offset of the current chunk (relative to `read_offset`)
+        self._chunk_index = 0   # the index number of the current chunk that is currently being read  # noqa
+        self._chunk_offset = 0  # the offset of the current chunk (relative to `read_offset`)  # noqa
         self._chunk_size = 0    # the size of the current chunk
 
         # per-FIT-file state (private)
-        self._crc = utils.CRC_START  # current CRC value, updated upon every read, reset on each new "FIT file"
+        self._crc = utils.CRC_START  # current CRC value, updated upon every read, reset on each new "FIT file"  # noqa
         self._header = None          # `FitHeader` of the **current** "FIT file"
         self._file_id = None         # last read file_id `FitDataMessage` object
-        self._body_bytes_left = 0    # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"
-        self._local_mesg_defs = {}   # registry of every `FitDefinitionMessage` in this file so far
+        self._body_bytes_left = 0    # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"  # noqa
+        self._local_mesg_defs = {}   # registry of every `FitDefinitionMessage` in this file so far  # noqa
         self._local_dev_types = {}   # registry of developer types
-        self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"
+        self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"  # noqa
         self._accumulators = {}
         self._last_timestamp = 0
         self._hr_start_timestamp = 0  # special case for the ``hr`` message

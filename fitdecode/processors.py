@@ -51,7 +51,7 @@ class DataProcessorBase:
     exist (hence the aforementioned caching)::
 
         def process_type_<type_name>(reader, field_data)
-        def process_field_<field_name>(reader, field_data)  # can be unknown_XYZ but NOT recommended
+        def process_field_<field_name>(reader, field_data)  # could be unknown_XYZ but NOT recommended  # noqa
         def process_units_<unit_name>(reader, field_data)
         def process_message_<mesg_name>(reader, data_message)
 

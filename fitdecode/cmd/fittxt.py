@@ -93,7 +93,9 @@ def txt_encode(obj):
 
     if isinstance(obj, fitdecode.FitDefinitionMessage):
         return PrintableObject(
-            _label=f'chunk#{obj.chunk.index} - fit_definition - {obj.name} (loc#{obj.local_mesg_num} glob#{obj.global_mesg_num})',
+            _label=(
+                f'chunk#{obj.chunk.index} - fit_definition - {obj.name} '
+                f'(loc#{obj.local_mesg_num} glob#{obj.global_mesg_num})'),
             chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
@@ -106,7 +108,9 @@ def txt_encode(obj):
 
     if isinstance(obj, fitdecode.FitDataMessage):
         return PrintableObject(
-            _label=f'chunk#{obj.chunk.index} - fit_data - {obj.name} (loc#{obj.local_mesg_num} glob#{obj.global_mesg_num})',
+            _label=(
+                f'chunk#{obj.chunk.index} - fit_data - {obj.name} '
+                f'(loc#{obj.local_mesg_num} glob#{obj.global_mesg_num})'),
             chunk=obj.chunk,
             header=PrintableObject(
                 local_mesg_num=obj.local_mesg_num,
