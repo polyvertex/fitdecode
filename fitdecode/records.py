@@ -197,6 +197,13 @@ class FitDataMessage:
             if field.is_named(field_name_or_num):
                 yield field
 
+    def get_raw_value(
+            self, field_name_or_num, *, idx=0, fallback=_UNSET, raw_value=True,
+            fit_type=None, py_type=_UNSET):
+        return self.get_value(
+            field_name_or_num, idx=idx, fallback=fallback, raw_value=raw_value,
+            fit_type=fit_type, py_type=py_type)
+
     def get_value(
             self, field_name_or_num, *, idx=0, fallback=_UNSET, raw_value=False,
             fit_type=None, py_type=_UNSET):

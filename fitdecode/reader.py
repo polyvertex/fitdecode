@@ -792,13 +792,10 @@ class FitReader:
                 self._chunk_index, self._chunk_offset, chunk)
 
     def _add_dev_data_id(self, message):
-        dev_data_index = message.get_field('developer_data_index').raw_value
+        dev_data_index = message.get_raw_value('developer_data_index')
         dev_data_index = int(dev_data_index)
 
-        try:
-            application_id = message.get_field('application_id').raw_value
-        except KeyError:
-            application_id = None
+        application_id = message.get_raw_value('application_id', fallback=None)
 
         # declare/overwrite type
         self._add_dev_data_id_impl(dev_data_index, application_id)
@@ -810,27 +807,21 @@ class FitReader:
             'fields': {}}
 
     def _add_dev_field_description(self, message):
-        dev_data_index = message.get_field('developer_data_index').raw_value
+        dev_data_index = message.get_raw_value('developer_data_index')
         dev_data_index = int(dev_data_index)
         if dev_data_index not in self._local_dev_types:
             raise FitParseError(
                 self._chunk_offset,
                 f'dev_data_index {dev_data_index} not defined')
 
-        field_def_num = message.get_field('field_definition_number').raw_value
-        base_type_id = message.get_field('fit_base_type_id').raw_value
-        field_name = message.get_field('field_name').raw_value
+        field_def_num = message.get_raw_value('field_definition_number')
+        base_type_id = message.get_raw_value('fit_base_type_id')
+        field_name = message.get_raw_value('field_name')
 
-        try:
-            units = message.get_field('units').raw_value
-        except KeyError:
-            units = None
+        units = message.get_raw_value('units', fallback=None)
 
-        try:
-            native_field_num = message.get_field('native_field_num')
-            native_field_num = native_field_num.raw_value
-        except KeyError:
-            native_field_num = None
+        native_field_num = message.get_raw_value(
+            'native_field_num', fallback=None)
 
         # declare/overwrite type
         self._add_dev_field_description_impl(
