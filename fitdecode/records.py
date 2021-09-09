@@ -6,6 +6,7 @@ import itertools
 __all__ = [
     'FitChunk', 'FitHeader', 'FitCRC', 'FitDefinitionMessage', 'FitDataMessage',
     'FIT_FRAME_HEADER', 'FIT_FRAME_CRC',
+    'FIT_FRAME_DEFINITION', 'FIT_FRAME_DATA',
     'FIT_FRAME_DEFMESG', 'FIT_FRAME_DATAMESG']
 
 
@@ -13,8 +14,12 @@ _UNSET = object()
 
 FIT_FRAME_HEADER = 1
 FIT_FRAME_CRC = 2
-FIT_FRAME_DEFMESG = 3
-FIT_FRAME_DATAMESG = 4
+FIT_FRAME_DEFINITION = 3
+FIT_FRAME_DATA = 4
+
+# keep aliases for backward compatibility
+FIT_FRAME_DEFMESG = FIT_FRAME_DEFINITION
+FIT_FRAME_DATAMESG = FIT_FRAME_DATA
 
 
 class FitChunk:
