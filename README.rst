@@ -10,8 +10,8 @@ fitdecode
     :target: https://app.travis-ci.com/github/polyvertex/fitdecode
 
 
-A `FIT <https://www.thisisant.com>`_ file parsing and decoding library written in
-`Python3 <https://www.python.org/>`_ (3.6+ only).
+A `FIT <https://www.thisisant.com>`_ file parsing and decoding library written
+in `Python3 <https://www.python.org/>`_ version ``>= 3.6``.
 
 
 Usage Example
