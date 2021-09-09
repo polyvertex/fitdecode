@@ -1,9 +1,23 @@
-# ReadTheDocs' default Python version is 3.5 for now (as of 2018-07-11), force
-# version 3.6 since fitdecode requires it.
-# Ref: https://blog.readthedocs.com/python-36-support/
+version: 2
 
 build:
   image: latest
 
 python:
-  version: 3.6
+  version: "3.6"
+
+  # the following config does:
+  #   $ pip install .[docs]
+  #   $ python package/setup.py install
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+    - method: setuptools
+      path: package
+
+sphinx:
+  builder: html
+  configuration: docs/conf.py
+  fail_on_warning: false
