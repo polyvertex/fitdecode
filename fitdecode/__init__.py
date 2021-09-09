@@ -6,7 +6,7 @@ if version_info < (3, 6):
     raise ImportError('fitdecode requires Python 3.6+')
 del version_info
 
-from .__version__ import (
+from .__meta__ import (
     __version__, version_info,
     __title__, __fancy_title__, __description__, __url__,
     __license__, __author__, __copyright__)

@@ -9,7 +9,7 @@ sys.path.insert(0, _PROJECT_DIR)
 
 # import project's info (name, version, ...)
 _ABOUT = {}
-with open(os.path.join(_PROJECT_DIR, 'fitdecode', '__version__.py'),
+with open(os.path.join(_PROJECT_DIR, 'fitdecode', '__meta__.py'),
           mode='r', encoding='utf-8') as f:
     exec(f.read(), _ABOUT)
 
