@@ -6,8 +6,8 @@ fitdecode
     :target: https://fitdecode.readthedocs.io/
     :alt: Latest Docs
 
-.. image:: https://travis-ci.org/polyvertex/fitdecode.svg
-    :target: https://travis-ci.org/polyvertex/fitdecode
+.. image:: https://api.travis-ci.com/polyvertex/fitdecode.svg
+    :target: https://app.travis-ci.com/github/polyvertex/fitdecode
 
 
 A `FIT <https://www.thisisant.com>`_ file parsing and decoding library written in
