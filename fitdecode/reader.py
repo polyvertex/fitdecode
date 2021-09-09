@@ -792,8 +792,23 @@ class FitReader:
             self._chunk_index, self._chunk_offset, chunk)
 
     def _add_dev_data_id(self, message):
-        dev_data_index = message.get_raw_value('developer_data_index')
-        dev_data_index = int(dev_data_index)
+        try:
+            dev_data_index = message.get_raw_value('developer_data_index')
+            dev_data_index = int(dev_data_index)
+        except KeyError as exc:
+            msg = (
+                f'{str(exc)} (local_mesg_num: {message.local_mesg_num}; '
+                f'chunk_offset: {self._chunk_offset})')
+
+            if self.error_handling is ErrorHandling.RAISE:
+                raise FitParseError(self._chunk_offset, msg)
+            elif self.error_handling is ErrorHandling.WARN:
+                msg += '; adding dummy dev data...'
+                warnings.warn(msg)
+            else:
+                assert self.error_handling is ErrorHandling.IGNORE
+
+            dev_data_index = None
 
         application_id = message.get_raw_value('application_id', fallback=None)
 
@@ -807,26 +822,46 @@ class FitReader:
             'fields': {}}
 
     def _add_dev_field_description(self, message):
-        dev_data_index = message.get_raw_value('developer_data_index')
-        dev_data_index = int(dev_data_index)
-        if dev_data_index not in self._local_dev_types:
-            raise FitParseError(
-                self._chunk_offset,
-                f'dev_data_index {dev_data_index} not defined')
+        adfdi_args = []
 
-        field_def_num = message.get_raw_value('field_definition_number')
-        base_type_id = message.get_raw_value('fit_base_type_id')
-        field_name = message.get_raw_value('field_name')
+        # CAUTION: order of args matters, check out below how adfdi_args is used
+        for raw_value_name in (
+                'developer_data_index', 'field_definition_number',
+                'fit_base_type_id', 'field_name', 'units', 'native_field_num'):
+            try:
+                raw_value = message.get_raw_value(raw_value_name)
+            except KeyError as exc:
+                msg = (
+                    f'{str(exc)} (local_mesg_num: {message.local_mesg_num}; '
+                    f'chunk_offset: {self._chunk_offset})')
 
-        units = message.get_raw_value('units', fallback=None)
+                if self.error_handling is ErrorHandling.RAISE:
+                    raise FitParseError(self._chunk_offset, msg)
+                elif self.error_handling is ErrorHandling.WARN:
+                    msg += '; adding dummy dev data...'
+                    warnings.warn(msg)
+                else:
+                    assert self.error_handling is ErrorHandling.IGNORE
 
-        native_field_num = message.get_raw_value(
-            'native_field_num', fallback=None)
+                raw_value = None
+            else:
+                if raw_value_name == 'dev_data_index':
+                    if raw_value is not None:
+                        raw_value = int(raw_value)
+                    if raw_value not in self._local_dev_types:
+                        raise FitParseError(
+                            self._chunk_offset,
+                            f'dev_data_index {raw_value} not defined')
+                elif raw_value_name == 'fit_base_type_id':
+                    if raw_value is None:
+                        raw_value = types.BASE_TYPE_BYTE
+                    else:
+                        raw_value = types.BASE_TYPES[raw_value]
+
+            adfdi_args.append(raw_value)
 
         # declare/overwrite type
-        self._add_dev_field_description_impl(
-            dev_data_index, field_def_num, types.BASE_TYPES[base_type_id],
-            field_name, units, native_field_num)
+        self._add_dev_field_description_impl(*adfdi_args)
 
     def _add_dev_field_description_impl(
             self, dev_data_index, field_def_num, base_type=types.BASE_TYPE_BYTE,
