@@ -786,7 +786,6 @@ class FitReader:
             assert sum(map(lambda x: len(x), chunk)) == self._chunk_size
             return records.FitChunk(
                 self._chunk_index, self._chunk_offset, b''.join(chunk))
-
         else:
             assert len(chunk) == self._chunk_size
             return records.FitChunk(

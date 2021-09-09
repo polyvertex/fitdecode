@@ -256,7 +256,7 @@ class FitDataMessage:
                         field_data = field
                         break
 
-        if not field_data:
+        if field_data is None:
             if fallback is _UNSET:
                 raise KeyError(
                     f'field "{field_name_or_num}" (idx #{idx}) not found in '
