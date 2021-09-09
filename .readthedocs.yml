@@ -8,14 +8,14 @@ python:
 
   # the following config does:
   #   $ pip install .[docs]
-  #   $ python package/setup.py install
+  #   $ python setup.py install
   install:
     - method: pip
       path: .
       extra_requirements:
         - docs
     - method: setuptools
-      path: package
+      path: .
 
 sphinx:
   builder: html
