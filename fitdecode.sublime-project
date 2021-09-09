@@ -16,40 +16,59 @@
 
     "build_systems":
     [
+        // Code Style - Active File
         {
-            "name": "fitdecode - Code Style - Active File",
+            "name": "Code Style - Active File",
             "working_dir": "$project_path",
-            "cmd": ["/usr/bin/env", "python3", "-m", "flake8", "$file"],
             "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
+            "quiet": true,
+            "word_wrap": false,
             "selector": "source.python",
+
+            "env": {"PYTHONIOENCODING": "utf-8"},
+            "cmd": ["/usr/bin/env", "python3", "-B", "-m", "flake8", "$file"],
+
+            "windows":
+            {
+                "cmd": ["cmd.exe", "/C", "python3", "-B", "-m", "flake8", "$file"]
+            }
+        },
+
+        // Code Style - Full Project
+        //
+        // A new build system has to be declared for this instead of just
+        // declaring it as a variant of the one above because Sublime does not
+        // seem to support the "selector" on a per-variant basis. At least not
+        // in build 3143.
+        {
+            "name": "Code Style - Full Project",
+            "working_dir": "$project_path",
+            "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
             "quiet": true,
             "word_wrap": false,
 
             "env": {"PYTHONIOENCODING": "utf-8"},
+            "cmd": ["/usr/bin/env", "python3", "-B", "-m", "flake8"],
 
             "windows":
             {
-                "cmd": ["tools\\py.cmd", "-m", "flake8", "$file"]
+                "cmd": ["cmd.exe", "/C", "python3", "-B", "-m", "flake8"]
             }
         },
 
-        // A new build system has to be declared for this instead of just
-        // declaring it as a variant of the one above because Sublime does not
-        // seem to support the "selector" on a per-variant basis.
-        // At least not in build 3143.
+        // UnitTest
         {
-            "name": "fitdecode - Code Style - Full Project",
+            "name": "fitdecode - UnitTest",
             "working_dir": "$project_path",
-            "cmd": ["/usr/bin/env", "python3", "-m", "flake8"],
-            "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
-            "quiet": false,
+            "quiet": true,
             "word_wrap": false,
 
             "env": {"PYTHONIOENCODING": "utf-8"},
+            "cmd": ["/usr/bin/env", "python3", "-B", "setup.py", "test"],
 
             "windows":
             {
-                "cmd": ["tools\\py.cmd", "-m", "flake8"]
+                "cmd": ["cmd.exe", "/C", "python3", "-B", "setup.py", "test"]
             }
         }
     ]
