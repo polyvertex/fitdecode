@@ -5,10 +5,19 @@ Change Log
 ==========
 
 
+v0.8.0 (2021-09-09)
+===================
+
+* `FitReader` gets the ``error_handling`` argument to be less strict on
+  malformed files (issues #13, #16, #18)
+* FIT SDK profile upgraded to v21.60
+* Minor corrections, improvements and cleanup on code and documentation
+
+
 v0.7.0 (2020-10-04)
 ===================
 
-* Compatibility with Apple Watch improved (fix #10)
+* Compatibility with Apple Watch improved (issue #10)
 * FIT SDK profile upgraded to v21.38
 * ``generate_profile`` utility now supports recent SDK file structure
 * Minor improvements and cleanup on code and documentation
@@ -31,7 +40,7 @@ v0.5.0 (2019-04-11)
 
 * Added `fitdecode.DataProcessorBase` class
 * ``check_crc`` - the parameter to `fitdecode.FitReader`'s constructor - can now
-  be either "enabled", "read-only" or "disabled" (fix #1)
+  be either "enabled", "read-only" or "disabled" (issue #1)
 * Minor speed improvements
 
 
