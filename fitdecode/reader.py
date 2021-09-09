@@ -507,9 +507,9 @@ class FitReader:
                 #   https://github.com/dtcooper/python-fitparse/pull/116
                 #   https://github.com/GoldenCheetah/GoldenCheetah/issues/3645
                 msg = (
-                    f'invalid field size {field_size} @ {self._chunk_offset} '
-                    f'for type {base_type.name} (expected a multiple of '
-                    f'{base_type.size})')
+                    f'invalid field size {field_size} in definition message @ '
+                    f'{self._chunk_offset} for type {base_type.name} (expected '
+                    f'a multiple of {base_type.size})')
 
                 if self.error_handling is ErrorHandling.RAISE:
                     raise FitParseError(self._chunk_offset, msg)
@@ -779,17 +779,17 @@ class FitReader:
             return None
 
         assert chunk
-        assert isinstance(chunk, (list, tuple, bytes))
 
         if isinstance(chunk, (list, tuple)):
-            # *chunk* is a list of chunks
-            assert sum(map(lambda x: len(x), chunk)) == self._chunk_size
-            return records.FitChunk(
-                self._chunk_index, self._chunk_offset, b''.join(chunk))
+            # *chunk* is a iterable of chunks
+            chunk = b''.join(chunk)
         else:
-            assert len(chunk) == self._chunk_size
-            return records.FitChunk(
-                self._chunk_index, self._chunk_offset, chunk)
+            assert isinstance(chunk, bytes)
+
+        assert len(chunk) == self._chunk_size
+
+        return records.FitChunk(
+            self._chunk_index, self._chunk_offset, chunk)
 
     def _add_dev_data_id(self, message):
         dev_data_index = message.get_raw_value('developer_data_index')
@@ -843,10 +843,10 @@ class FitReader:
             dev_type = self._local_dev_types[dev_data_index]
         except KeyError:
             msg = (
-                f'dev_data_index {dev_data_index} not defined '
-                f'@ {self._chunk_offset} (looking up for field '
-                f'{field_def_num}; local_mesg_num: {local_mesg_num}; '
-                f'global_mesg_num: {global_mesg_num})')
+                f'dev_data_index {dev_data_index} not defined (looking up for '
+                f'field {field_def_num}; local_mesg_num: {local_mesg_num}; '
+                f'global_mesg_num: {global_mesg_num}; chunk_offset: '
+                f'{self._chunk_offset})')
 
             if self.error_handling is ErrorHandling.RAISE:
                 raise FitParseError(self._chunk_offset, msg)
@@ -864,8 +864,9 @@ class FitReader:
         except KeyError:
             msg = (
                 f'no such field {field_def_num} for dev_data_index '
-                f'{dev_data_index} @ {self._chunk_offset} (local_mesg_num: '
-                f'{local_mesg_num}; global_mesg_num: {global_mesg_num})')
+                f'{dev_data_index} (local_mesg_num: {local_mesg_num}; '
+                f'global_mesg_num: {global_mesg_num}; chunk_offset: '
+                f'{self._chunk_offset})')
 
             if self.error_handling is ErrorHandling.RAISE:
                 raise FitParseError(self._chunk_offset, msg)
