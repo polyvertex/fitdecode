@@ -56,7 +56,7 @@ class ErrorHandling(enum.Enum):
     #: `FitDataMessage` frames that rely on this definition.
     IGNORE = 0
 
-    #: Default behavior. Same as `DISABLED` but `FitReader` emits a warning with
+    #: Default behavior. Same as `IGNORE` but `FitReader` emits a warning with
     #: `warnings.warn`.
     WARN = 1
 
