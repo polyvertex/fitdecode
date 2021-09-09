@@ -1,8 +1,18 @@
 language: python
 
+# as per travis docs:
+# "Python builds are not available on the macOS and Windows environments."
+os:
+  - linux
+  # - osx
+  # - windows
+
 python:
   - 3.6
-  # - pypy3.6
+  - 3.7
+  - 3.8
+  - 3.9
+  - pypy3
 
 script:
   - python --version
