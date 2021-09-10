@@ -37,8 +37,14 @@ def get_mesg_type(mesg_name_or_num):
 
     Raise `ValueError` if type was not found.
     """
-    for mesg_num, mesg_type in profile.MESSAGE_TYPES.items():
-        if mesg_name_or_num in (mesg_num, mesg_type.name):
+    # assume mesg_num first
+    try:
+        return profile.MESSAGE_TYPES[mesg_name_or_num]
+    except KeyError:
+        pass
+
+    for mesg_type in profile.MESSAGE_TYPES.values():
+        if mesg_name_or_num == mesg_type.name:
             return mesg_type
 
     raise ValueError(f'message type "{mesg_name_or_num}" not found')
