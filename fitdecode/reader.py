@@ -203,15 +203,10 @@ class FitReader:
         self._last_timestamp = 0
         self._hr_start_timestamp = 0  # special case for the ``hr`` message
 
-        if hasattr(fileish, '__fspath__'):
-            fileish = os.fspath(fileish)
-            if not isinstance(fileish, str):
-                fileish = os.fsdecode(fileish)
-
         if hasattr(fileish, 'read'):
             self._fd = fileish
             self._fd_owned = False
-        elif isinstance(fileish, str):
+        elif isinstance(fileish, str) or hasattr(fileish, '__fspath__'):
             self._fd = open(fileish, mode='rb')
             self._fd_owned = True
         else:
