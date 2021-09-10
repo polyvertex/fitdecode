@@ -52,7 +52,7 @@ def get_mesg_num(mesg_name):
     """
     for mesg_type in profile.MESSAGE_TYPES.values():
         if mesg_name == mesg_type.name:
-            return mesg_type
+            return mesg_type.mesg_num
 
     raise ValueError(f'message type "{mesg_name}" not found')
 
