@@ -1,9 +1,0 @@
-* Project and CI
-  * Pipenv
-  * AppVeyor CI
-  * .gitlab-ci.yml
-  * Coverage.py???
-  * Check for PyPy compliance once it's compatible with 3.6+ (3.5 only atm)
-    and add it to .travis.yml
-
-* Improve docs
