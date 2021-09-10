@@ -170,6 +170,7 @@ class FitReader:
         self._fd = None        # the file object to read from
         self._read_offset = 0  # read cursor position in the file
         self._read_size = 0    # count bytes read from this file so far in total
+        self._fit_file_index = -1  # the index of the current FIT file in this data stream  # noqa
 
         # per-chunk state (private)
         self._chunk_index = 0   # the index number of the current chunk that is currently being read  # noqa
@@ -246,6 +247,21 @@ class FitReader:
         return self._file_id
 
     @property
+    def fit_file_index(self):
+        """
+        The zero-based index `int` of the so-called *FIT file* currently read
+        from this data stream so far.
+
+        `None` if no *FIT file* header has been encoutered yet.
+        """
+        return self._fit_file_index if self._fit_file_index >= 0 else None
+
+    @property
+    def fit_files_count(self):
+        """The number of FIT files found in this data stream so far."""
+        return self._fit_file_index + 1
+
+    @property
     def local_mesg_defs(self):
         """
         Read-only access to the `dict` of local message types of the current
@@ -314,6 +330,8 @@ class FitReader:
                 self._read_header()
                 if self._header is None:
                     break
+
+                self._fit_file_index += 1
 
                 yield self._header
                 _update_state()
