@@ -108,7 +108,7 @@ def parse_args(args=None):
         epilog='fitdecode version ' + fitdecode.__version__)
 
     parser.add_argument(
-        '-o', '--output', type=argparse.FileType(mode='wt', encoding='utf-8'),
+        '--output', '-o', type=argparse.FileType(mode='wt', encoding='utf-8'),
         default='-',
         help='File to output data into (defaults to stdout)')
 
@@ -118,13 +118,13 @@ def parse_args(args=None):
 
     parser.add_argument(
         '--nocrc', action='store_const',
-        default=fitdecode.CrcCheck.ENABLED,
         const=fitdecode.CrcCheck.DISABLED,
+        default=fitdecode.CrcCheck.WARN,
         help="Some devices seem to write invalid CRC's, ignore these.")
 
     parser.add_argument(
-        '--nodef', action='store_const', const=True,
-        help="Do not output FIT so-called local message definitions.")
+        '--nodef', action='store_true',
+        help="Do not output FIT local message definitions.")
 
     parser.add_argument(
         '-f', '--filter', action='append',

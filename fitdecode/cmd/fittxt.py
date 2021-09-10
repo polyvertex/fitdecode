@@ -285,26 +285,22 @@ def parse_args(args=None):
         epilog='fitdecode version ' + fitdecode.__version__)
 
     parser.add_argument(
-        '-o', '--output', type=argparse.FileType(mode='wt', encoding='utf-8'),
+        '--output', '-o', type=argparse.FileType(mode='wt', encoding='utf-8'),
         default='-',
         help='File to output data into (defaults to stdout)')
 
     parser.add_argument(
-        'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
-        help='Input .FIT file (use - for stdin)')
-
-    parser.add_argument(
         '--nocrc', action='store_const',
-        default=fitdecode.CrcCheck.ENABLED,
         const=fitdecode.CrcCheck.DISABLED,
+        default=fitdecode.CrcCheck.WARN,
         help="Some devices seem to write invalid CRC's, ignore these.")
 
     parser.add_argument(
-        '--nodef', action='store_const', const=True,
+        '--nodef', action='store_true',
         help="Do not output FIT so-called local message definitions.")
 
     parser.add_argument(
-        '--strip', action='store_const', const=True,
+        '--strip', action='store_true',
         help="Do not output the extended global stats in header")
 
     parser.add_argument(
@@ -312,6 +308,10 @@ def parse_args(args=None):
         help=(
             'Message name(s) (or global numbers) to filter-in '
             '(other messages are then ignored).'))
+
+    parser.add_argument(
+        'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
+        help='Input .FIT file (use - for stdin)')
 
     options = parser.parse_args(args)
 
