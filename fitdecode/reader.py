@@ -375,11 +375,11 @@ class FitReader:
                 # regular EOF: storage is empty or previous "FIT file" ended
                 # normally
                 return
-            raise FitHeaderError(f'file too small ({exc})')
+            raise FitHeaderError(f'file truncated? {exc}')
 
         # check header size
         if header_size < len(chunk) or header_magic != b'.FIT':
-            raise FitHeaderError('not a FIT file')
+            raise FitHeaderError(f'not a FIT file @ {self._chunk_offset}')
 
         # read the extended part of the header (i.e. byte 12-...)
         extra_header_size = header_size - len(chunk)
@@ -388,11 +388,15 @@ class FitReader:
         if extra_header_size:
             # at least 2 bytes expected for the CRC
             if extra_header_size < 2:
-                raise FitHeaderError('unsupported FIT header')
+                raise FitHeaderError(
+                    f'unsupported FIT header (CRC field missing; '
+                    f'header offset: {self._chunk_offset})')
 
             extra_chunk = self._read_bytes(extra_header_size)
             if len(extra_chunk) != extra_header_size:
-                raise FitHeaderError('truncated FIT header')
+                raise FitHeaderError(
+                    f'truncated FIT header '
+                    f'(header offset: {self._chunk_offset})')
 
             (read_crc, ) = struct.unpack('<H', extra_chunk)
             if not read_crc:  # can be null according to SDK
