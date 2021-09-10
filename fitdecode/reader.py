@@ -199,6 +199,8 @@ class FitReader:
 
         if hasattr(fileish, '__fspath__'):
             fileish = os.fspath(fileish)
+            if not isinstance(fileish, str):
+                fileish = os.fsdecode(fileish)
 
         if hasattr(fileish, 'read'):
             self._fd = fileish
