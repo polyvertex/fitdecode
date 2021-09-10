@@ -73,24 +73,24 @@ class DataProcessorBase:
 
     def on_process_type(self, reader, field_data):
         self._run_processor(
-            'process_type_' + field_data.type.name,
+            f'process_type_{field_data.type.name}',
             reader, field_data)
 
     def on_process_field(self, reader, field_data):
         if field_data.name:
             self._run_processor(
-                'process_field_' + field_data.name,
+                f'process_field_{field_data.name}',
                 reader, field_data)
 
     def on_process_unit(self, reader, field_data):
         if field_data.units:
             self._run_processor(
-                'process_units_' + field_data.units,
+                f'process_units_{field_data.units}',
                 reader, field_data)
 
     def on_process_message(self, reader, data_message):
         self._run_processor(
-            'process_message_' + data_message.def_mesg.name,
+            f'process_message_{data_message.def_mesg.name}',
             reader, data_message)
 
     def _run_processor(self, method_name, reader, data):
