@@ -188,7 +188,7 @@ class FitReader:
         # per-FIT-file state (private)
         self._crc = utils.CRC_START  # current CRC value, updated upon every read, reset on each new "FIT file"  # noqa
         self._header = None          # `FitHeader` of the **current** "FIT file"
-        self._file_id = None         # last read file_id `FitDataMessage` object
+        self._current_file_id = None # current file_id `FitDataMessage` object
         self._body_bytes_left = 0    # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"  # noqa
         self._local_mesg_defs = {}   # registry of every `FitDefinitionMessage` in this file so far  # noqa
         self._local_dev_types = {}   # registry of developer types
@@ -251,8 +251,13 @@ class FitReader:
 
     @property
     def file_id(self):
-        """The last read ``file_id`` `FitDataMessage` object. May be `None`."""
-        return self._file_id
+        """
+        The ``file_id`` `FitDataMessage` object related to the current FIT file.
+
+        May be `None`. Typically before a `FitHeader` frame, or after a `FitCRC`
+        frame.
+        """
+        return self._current_file_id
 
     @property
     def fit_file_index(self):
@@ -309,7 +314,7 @@ class FitReader:
         self._chunk_size = 0
         self._crc = utils.CRC_START
         self._header = None
-        self._file_id = None
+        self._current_file_id = None
         self._body_bytes_left = 0
         self._local_mesg_defs = {}
         self._local_dev_types = {}
@@ -386,6 +391,7 @@ class FitReader:
         # reset per-FIT-file state
         self._crc = utils.CRC_START
         self._header = None
+        self._current_file_id = None
         self._body_bytes_left = 0
         self._local_mesg_defs = {}
         self._local_dev_types = {}
@@ -757,7 +763,7 @@ class FitReader:
 
         # keep track of the last file_id message
         if def_mesg.global_mesg_num == profile.MESG_NUM_FILE_ID:
-            self._file_id = data_message
+            self._current_file_id = data_message
 
         return data_message
 
