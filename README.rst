@@ -10,8 +10,8 @@ fitdecode
     :target: https://app.travis-ci.com/github/polyvertex/fitdecode
 
 
-A `FIT <https://www.thisisant.com>`_ file parsing and decoding library written
-in `Python3 <https://www.python.org/>`_ (``>= 3.6``).
+A `FIT <https://developer.garmin.com/fit/overview/>`_ file parsing and decoding
+library written in `Python3 <https://www.python.org/>`_ (``>= 3.6``).
 
 
 Usage Example
@@ -57,7 +57,7 @@ multiples times::
 
     $ # include only RECORD messages:
     $ fitjson -f=record -o out_file.json in_file.fit
-    $
+
     $ # exclude FILE_ID and EVENT messages:
     $ fitjson -f=-file_id -f=-event -o out_file.json in_file.fit
 
