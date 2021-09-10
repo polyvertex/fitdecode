@@ -93,6 +93,11 @@ class FitReader:
     `FitHeader` object is yielded during iteration to mark the beginning of each
     new "FIT File".
 
+    First argument *fileish* can be passed as a file-like or a path-like object
+    (`os.PathLike`). File-like object must be opened in byte-mode. File-like
+    object is not owned by `FitReader` so it is up to the caller to close it
+    manually.
+
     Usage::
 
         import fitdecode
@@ -176,6 +181,7 @@ class FitReader:
 
         # per-stream state (private)
         self._fd = None        # the file object to read from
+        self._fd_owned = None  # do we own self._fd?
         self._read_offset = 0  # read cursor position in the file
         self._read_size = 0    # count bytes read from this file so far in total
         self._fit_file_index = -1  # the index of the current FIT file in this data stream  # noqa
@@ -204,10 +210,13 @@ class FitReader:
 
         if hasattr(fileish, 'read'):
             self._fd = fileish
+            self._fd_owned = False
         elif isinstance(fileish, str):
             self._fd = open(fileish, mode='rb')
+            self._fd_owned = True
         else:
             self._fd = io.BytesIO(fileish)
+            self._fd_owned = True
 
         try:
             self._read_offset = self._fd.tell()
@@ -302,13 +311,14 @@ class FitReader:
 
     def close(self):
         """
-        Close the file handle (constructor's *fileish*) and clear the internal
-        state.
+        Close the internal file handle if it is owned by this object, and clear
+        the internal state.
         """
-        if self._fd is not None and hasattr(self._fd, 'close'):
+        if self._fd is not None and self._fd_owned and hasattr(self._fd, 'close'):
             self._fd.close()
 
         self._fd = None
+        self._fd_owned = None
         self._read_offset = 0
         self._read_size = 0
         self._fit_file_index = -1
