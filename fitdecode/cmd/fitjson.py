@@ -113,8 +113,8 @@ def parse_args(args=None):
         help='File to output data into (defaults to stdout)')
 
     parser.add_argument(
-        'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
-        help='Input .FIT file (use - for stdin)')
+        '--pretty', action='store_true',
+        help="Prettify JSON output.")
 
     parser.add_argument(
         '--nocrc', action='store_const',
@@ -131,6 +131,10 @@ def parse_args(args=None):
         help=(
             'Message name(s) (or global numbers) to filter-in '
             '(other messages are then ignored).'))
+
+    parser.add_argument(
+        'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
+        help='Input .FIT file (use - for stdin)')
 
     options = parser.parse_args(args)
 
@@ -170,7 +174,8 @@ def main(args=None):
         print('', file=sys.stderr)
         traceback.print_exc()
 
-    json.dump(frames, fp=options.output, cls=RecordJSONEncoder)
+    indent = "\t" if options.pretty else None
+    json.dump(frames, fp=options.output, cls=RecordJSONEncoder, indent=indent)
 
     return 0
 
