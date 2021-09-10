@@ -5,6 +5,16 @@ Change Log
 ==========
 
 
+v0.9.0 (2021-09-10)
+===================
+
+* `FitReader` gets new properties ``fit_file_index`` and ``fit_files_count``
+* New ``CrcCheck`` policy: ``WARN``
+* **BREAKING CHANGE:** ``CrcCheck`` default policy from ``RAISE`` to ``WARN``
+* `FitHeaderError` exception messages a bit more helpful
+* Minor corrections and code cleanup
+
+
 v0.8.0 (2021-09-09)
 ===================
 
