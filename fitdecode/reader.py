@@ -309,6 +309,7 @@ class FitReader:
         self._fd = None
         self._read_offset = 0
         self._read_size = 0
+        self._fit_file_index = -1
         self._chunk_index = 0
         self._chunk_offset = 0
         self._chunk_size = 0
