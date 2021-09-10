@@ -7,6 +7,7 @@ from collections import OrderedDict
 import datetime
 import json
 import types
+import re
 import sys
 import traceback
 
@@ -102,10 +103,47 @@ class RecordJSONEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
+def parse_filter_args(arg_parser, filter_opt):
+    FILTER_DESC = re.compile(r'^\s*([\+\-]?)\s*([^\s]+)\s*$', re.A)
+
+    if not filter_opt:
+        return filter_opt, None
+
+    filtr = {}  # {msg_num: bool_include}
+    default_include_policy = False
+
+    for desc in filter_opt:
+        msg = None
+        rem = FILTER_DESC.fullmatch(desc)
+        if rem:
+            include = False if rem[1] and rem[1] == '-' else True
+            msg = rem[2].lower()
+
+            if not include:
+                default_include_policy = True
+
+            try:
+                msg = fitdecode.utils.get_mesg_num(msg)
+            except ValueError:
+                try:
+                    msg = int(msg_name, base=0)
+                except ValueError:
+                    msg = None
+
+        if msg is None:
+            arg_parser.error(f'malformed filter: "{desc}"')
+            sys.exit(1)
+
+        filtr[msg] = include
+
+    return filtr, default_include_policy
+
+
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
         description='Dump a FIT file to JSON format',
-        epilog='fitdecode version ' + fitdecode.__version__)
+        epilog=f'fitdecode version {fitdecode.__version__}',
+        allow_abbrev=False)
 
     parser.add_argument(
         '--output', '-o', type=argparse.FileType(mode='wt', encoding='utf-8'),
@@ -114,29 +152,32 @@ def parse_args(args=None):
 
     parser.add_argument(
         '--pretty', action='store_true',
-        help="Prettify JSON output.")
+        help='Prettify JSON output.')
 
     parser.add_argument(
         '--nocrc', action='store_const',
         const=fitdecode.CrcCheck.DISABLED,
         default=fitdecode.CrcCheck.WARN,
-        help="Some devices seem to write invalid CRC's, ignore these.")
+        help='Some devices seem to write invalid CRC\'s, ignore these.')
 
     parser.add_argument(
         '--nodef', action='store_true',
-        help="Do not output FIT local message definitions.")
+        help='Do not output FIT local message definitions.')
 
     parser.add_argument(
-        '-f', '--filter', action='append',
+        '--filter', '-f', action='append',
         help=(
-            'Message name(s) (or global numbers) to filter-in '
-            '(other messages are then ignored).'))
+            'Message name(s) (or global numbers) to filter-in or out, '
+            'depending on sign prefix.  Examples: "-record" to exclude record '
+            'messages; "+file_id" or "file_id" to include file_id messages.'))
 
     parser.add_argument(
         'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
         help='Input .FIT file (use - for stdin)')
 
     options = parser.parse_args(args)
+    options.filter, options.default_filter = \
+        parse_filter_args(parser, options.filter)
 
     return options
 
@@ -153,17 +194,21 @@ def main(args=None):
                 check_crc=options.nocrc,
                 keep_raw_chunks=True) as fit:
             for frame in fit:
-                if options.nodef and isinstance(
-                        frame, fitdecode.FitDefinitionMessage):
+                if (options.nodef and
+                        frame.frame_type == fitdecode.FIT_FRAME_DEFINITION):
                     continue
 
                 if (options.filter and
-                        isinstance(frame, (
-                            fitdecode.FitDefinitionMessage,
-                            fitdecode.FitDataMessage)) and
-                        (frame.name not in options.filter) and
-                        (frame.global_mesg_num not in options.filter)):
-                    continue
+                        frame.frame_type in (
+                            fitdecode.FIT_FRAME_DEFINITION,
+                            fitdecode.FIT_FRAME_DATA)):
+                    try:
+                        include = options.filter[frame.global_mesg_num]
+                    except KeyError:
+                        include = options.default_filter
+
+                    if not include:
+                        continue
 
                 frames.append(frame)
     except Exception:
@@ -174,7 +219,7 @@ def main(args=None):
         print('', file=sys.stderr)
         traceback.print_exc()
 
-    indent = "\t" if options.pretty else None
+    indent = '\t' if options.pretty else None
     json.dump(frames, fp=options.output, cls=RecordJSONEncoder, indent=indent)
 
     return 0
