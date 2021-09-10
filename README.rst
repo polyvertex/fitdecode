@@ -11,7 +11,7 @@ fitdecode
 
 
 A `FIT <https://www.thisisant.com>`_ file parsing and decoding library written
-in `Python3 <https://www.python.org/>`_ version ``>= 3.6``.
+in `Python3 <https://www.python.org/>`_ (``>= 3.6``).
 
 
 Usage Example
@@ -41,11 +41,25 @@ Read a FIT file, frame by frame:
 Command line utilities
 ----------------------
 
-``fitjson`` and ``fittxt`` export JSON and txt files:
+``fitjson`` exports JSON:
 
 ::
 
-    $ fitjson in_file.fit -o out_file.json
+    $ fitjson --pretty -o out_file.json in_file.fit
+
+To ease the introspection or your FIT files, ``fittxt`` exports to a dedicated
+TXT format::
+
+    $ fittxt -o out_file.txt in_file.fit
+
+Both commands accept a ``--filter`` option (or ``-f``) which can be specified
+multiples times::
+
+    $ # include only RECORD messages:
+    $ fitjson -f=record -o out_file.json in_file.fit
+    $
+    $ # exclude FILE_ID and EVENT messages:
+    $ fitjson -f=-file_id -f=-event -o out_file.json in_file.fit
 
 
 Installation
