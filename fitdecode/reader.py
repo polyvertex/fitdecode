@@ -36,9 +36,17 @@ class CrcCheck(enum.Enum):
     #: :class:`fitdecode.FitCRCError` will ever be raised.
     READONLY = 1
 
+    #: CRC is computed and `FitReader` emits a warning message via
+    #: `warnings.warn()` in case of mismatching CRC value. No
+    #: :class:`fitdecode.FitCRCError` will ever be raised.
+    WARN = 2
+
     #: CRC is computed and matched by `FitReader`.
-    #: :class:`fitdecode.FitCRCError` is raised upon incorrect CRC values.
-    ENABLED = 2
+    #: :class:`fitdecode.FitCRCError` is raised upon incorrect CRC value.
+    RAISE = 3
+
+    #: Alias of `RAISE` for backward compatibility.
+    ENABLED = RAISE
 
 
 class ErrorHandling(enum.Enum):
@@ -138,12 +146,12 @@ class FitReader:
     """
 
     def __init__(
-            self, fileish, *, processor=_UNSET, check_crc=CrcCheck.ENABLED,
+            self, fileish, *, processor=_UNSET, check_crc=CrcCheck.RAISE,
             error_handling=ErrorHandling.WARN, keep_raw_chunks=False,
             data_bag=_UNSET):
         # backward compatibility
         if check_crc is True:
-            check_crc = CrcCheck.ENABLED
+            check_crc = CrcCheck.RAISE
         elif check_crc is False:
             check_crc = CrcCheck.DISABLED
 
@@ -358,7 +366,7 @@ class FitReader:
                 try:
                     crc_obj = self._read_crc()
                 except FitEOFError:
-                    # if self.check_crc is not CrcCheck.ENABLED:
+                    # if self.check_crc is not CrcCheck.RAISE:
                     #     # There is no CRC footer in this file (or it is
                     #     # incomplete) but caller does not mind about CRC so
                     #     # we will just ignore this
@@ -425,8 +433,18 @@ class FitReader:
             else:
                 computed_crc = utils.compute_crc(chunk)
                 crc_matched = computed_crc == read_crc
-                if self.check_crc is CrcCheck.ENABLED and not crc_matched:
-                    raise FitCRCError('invalid FIT header CRC')
+
+                if not crc_matched and (
+                        self.check_crc is CrcCheck.WARN or
+                        self.check_crc is CrcCheck.RAISE):
+                    msg = (
+                        f'mismatching CRC in FIT header '
+                        f'(header offset: {self._chunk_offset})')
+
+                    if self.check_crc is CrcCheck.RAISE:
+                        raise FitCRCError(msg)
+                    elif self.check_crc is CrcCheck.WARN:
+                        warnings.warn(msg)
 
             chunk += extra_chunk
 
@@ -451,8 +469,19 @@ class FitReader:
         computed_crc = self._crc
         chunk, read_crc = self._read_struct('<H')
 
-        if self.check_crc is CrcCheck.ENABLED and computed_crc != read_crc:
-            raise FitCRCError()
+        if computed_crc != read_crc and (
+                self.check_crc is CrcCheck.WARN or
+                self.check_crc is CrcCheck.RAISE):
+            msg = (
+                f'mismatching CRC in FIT footer '
+                f'(footer offset: {self._chunk_offset}; '
+                f'read crc: {read_crc}; '
+                f'expected crc: {computed_crc})')
+
+            if self.check_crc is CrcCheck.RAISE:
+                raise FitCRCError(msg)
+            elif self.check_crc is CrcCheck.WARN:
+                warnings.warn(msg)
 
         crc_obj = records.FitCRC(
             read_crc,
