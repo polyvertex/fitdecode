@@ -115,7 +115,7 @@ class FitReaderTestCase(unittest.TestCase):
             try:
                 with fitdecode.FitReader(
                         src_file,
-                        check_crc=fitdecode.CrcCheck.ENABLED,
+                        check_crc=fitdecode.CrcCheck.RAISE,
                         keep_raw_chunks=True) as fit:
                     for record in fit:
                         raw_content += record.chunk.bytes
@@ -140,7 +140,7 @@ class FitReaderTestCase(unittest.TestCase):
         try:
             tuple(fitdecode.FitReader(
                 _invalid_test_file('activity-filecrc.fit'),
-                check_crc=fitdecode.CrcCheck.ENABLED,
+                check_crc=fitdecode.CrcCheck.RAISE,
                 keep_raw_chunks=True))
             self.fail('did not detect an invalid CRC')
         except fitdecode.FitCRCError:
@@ -150,7 +150,7 @@ class FitReaderTestCase(unittest.TestCase):
         try:
             tuple(fitdecode.FitReader(
                 _invalid_test_file('activity-unexpected-eof.fit'),
-                check_crc=fitdecode.CrcCheck.ENABLED,
+                check_crc=fitdecode.CrcCheck.RAISE,
                 keep_raw_chunks=True))
             self.fail('did not detect an unexpected EOF')
         except fitdecode.FitEOFError:
@@ -159,19 +159,25 @@ class FitReaderTestCase(unittest.TestCase):
     def test_fitparse_invalid_chained_files(self):
         """Detect errors when files are chained - concatenated - together"""
         try:
-            tuple(fitdecode.FitReader(_invalid_test_file('activity-activity-filecrc.fit')))
+            tuple(fitdecode.FitReader(
+                _invalid_test_file('activity-activity-filecrc.fit'),
+                check_crc=fitdecode.CrcCheck.RAISE))
             self.fail("Didn't detect a CRC error in the chained file")
         except fitdecode.FitCRCError:
             pass
 
         try:
-            tuple(fitdecode.FitReader(_invalid_test_file('activity-settings-corruptheader.fit')))
+            tuple(fitdecode.FitReader(
+                _invalid_test_file('activity-settings-corruptheader.fit'),
+                check_crc=fitdecode.CrcCheck.RAISE))
             self.fail("Didn't detect a header error in the chained file")
         except fitdecode.FitHeaderError:
             pass
 
         try:
-            tuple(fitdecode.FitReader(_invalid_test_file('activity-settings-nodata.fit')))
+            tuple(fitdecode.FitReader(
+                _invalid_test_file('activity-settings-nodata.fit'),
+                check_crc=fitdecode.CrcCheck.RAISE))
             self.fail("Didn't detect an EOF error in the chaned file")
         except fitdecode.FitEOFError:
             pass
@@ -183,13 +189,13 @@ class FitReaderTestCase(unittest.TestCase):
         """
         tuple(fitdecode.FitReader(
             _invalid_test_file('elemnt-bolt-no-application-id-inside-developer-data-id.fit'),
-            check_crc=fitdecode.CrcCheck.ENABLED,
+            check_crc=fitdecode.CrcCheck.RAISE,
             keep_raw_chunks=True))
 
     def test_fitparse_basic_file_with_one_record(self, endian='<'):
         fit = tuple(fitdecode.FitReader(
             _generate_fitfile(endian=endian),
-            check_crc=fitdecode.CrcCheck.ENABLED,
+            check_crc=fitdecode.CrcCheck.RAISE,
             keep_raw_chunks=False))
 
         file_header = fit[0]
@@ -234,7 +240,7 @@ class FitReaderTestCase(unittest.TestCase):
         # parse the whole content
         fit = tuple(fitdecode.FitReader(
             _test_file('compressed-speed-distance.fit'),
-            check_crc=fitdecode.CrcCheck.ENABLED,
+            check_crc=fitdecode.CrcCheck.RAISE,
             keep_raw_chunks=False))
 
         # make a generator of 'record' messages
@@ -280,7 +286,7 @@ class FitReaderTestCase(unittest.TestCase):
         # parse the whole content
         fit = tuple(fitdecode.FitReader(
             fit_data,
-            check_crc=fitdecode.CrcCheck.ENABLED,
+            check_crc=fitdecode.CrcCheck.RAISE,
             keep_raw_chunks=False))
 
         event = fit[4]
@@ -327,7 +333,7 @@ class FitReaderTestCase(unittest.TestCase):
         # parse the whole content
         fit = tuple(fitdecode.FitReader(
             fit_data,
-            check_crc=fitdecode.CrcCheck.ENABLED,
+            check_crc=fitdecode.CrcCheck.RAISE,
             keep_raw_chunks=False))
 
         sport_point = fit[4]
@@ -403,7 +409,7 @@ class FitReaderTestCase(unittest.TestCase):
         # parse the whole content
         fit = tuple(fitdecode.FitReader(
             _test_file(fit_file),
-            check_crc=fitdecode.CrcCheck.ENABLED,
+            check_crc=fitdecode.CrcCheck.RAISE,
             keep_raw_chunks=False))
 
         # make a generator of 'record' messages
@@ -475,7 +481,9 @@ class FitReaderTestCase(unittest.TestCase):
         csv_fp.close()
 
     def test_fitparse_speed(self):
-        fit = fitdecode.FitReader(_test_file('2019-02-17-062644-ELEMNT-297E-195-0.fit'))
+        fit = fitdecode.FitReader(
+            _test_file('2019-02-17-062644-ELEMNT-297E-195-0.fit'),
+            check_crc=fitdecode.CrcCheck.RAISE)
 
         # find the first 'session' data message
         msg = next(
@@ -499,11 +507,14 @@ class FitReaderTestCase(unittest.TestCase):
                   'garmin-edge-820-bike.fit'):
             tuple(fitdecode.FitReader(
                 _test_file(x),
+                check_crc=fitdecode.CrcCheck.RAISE,
                 processor=fitdecode.StandardUnitsDataProcessor()))
 
     def test_fitparse_int_long(self):
         """Test that ints are properly shifted and scaled"""
-        fit = tuple(fitdecode.FitReader(_test_file('event_timestamp.fit')))
+        fit = tuple(fitdecode.FitReader(
+            _test_file('event_timestamp.fit'),
+            check_crc=fitdecode.CrcCheck.RAISE))
         raw_value = fit[-2].get_value('event_timestamp', idx=0, raw_value=True)
         self.assertEqual(raw_value, 863.486328125)
 

@@ -146,7 +146,7 @@ class FitReader:
     """
 
     def __init__(
-            self, fileish, *, processor=_UNSET, check_crc=CrcCheck.RAISE,
+            self, fileish, *, processor=_UNSET, check_crc=CrcCheck.WARN,
             error_handling=ErrorHandling.WARN, keep_raw_chunks=False,
             data_bag=_UNSET):
         # backward compatibility
