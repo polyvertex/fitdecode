@@ -57,7 +57,7 @@ class ErrorHandling(enum.Enum):
     IGNORE = 0
 
     #: Default behavior. Same as `IGNORE` but `FitReader` emits a warning with
-    #: `warnings.warn`.
+    #: `warnings.warn()`.
     WARN = 1
 
     #: Strict mode. `FitReader` raises a `FitParseError` exception when
@@ -166,7 +166,7 @@ class FitReader:
             self._processor = processor
         self._keep_raw = keep_raw_chunks
 
-        # state (private)
+        # per-stream state (private)
         self._fd = None        # the file object to read from
         self._read_offset = 0  # read cursor position in the file
         self._read_size = 0    # count bytes read from this file so far in total
@@ -310,7 +310,7 @@ class FitReader:
             if self._header is None:
                 assert self._body_bytes_left == 0
 
-                self._on_new_file()
+                self._reset_per_fit_state()
                 self._read_header()
                 if self._header is None:
                     break
@@ -322,8 +322,10 @@ class FitReader:
                 assert self._header is not None
 
                 record = self._read_record()
-                if not record:
-                    break
+
+                assert isinstance(record, (
+                    records.FitDefinitionMessage,
+                    records.FitDataMessage))
 
                 assert self._chunk_size <= self._body_bytes_left
                 self._body_bytes_left -= self._chunk_size
@@ -352,10 +354,10 @@ class FitReader:
                 # behavior due to malformed FIT stream (i.e. next FIT header
                 # missing), reset the internal state now as well, instead of
                 # resetting it only when a FIT header is read.
-                self._on_new_file()
+                self._reset_per_fit_state()
 
-    def _on_new_file(self):
-        # reset state
+    def _reset_per_fit_state(self):
+        # reset per-FIT-file state
         self._crc = utils.CRC_START
         self._header = None
         self._body_bytes_left = 0
