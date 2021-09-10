@@ -83,7 +83,7 @@ def get_mesg_field_num(mesg_name_or_num, field_name):
     mesg_type = get_mesg_type(mesg_name_or_num)
     for field in mesg_type.fields:
         if field.name == field_name:
-            return field
+            return field.def_num
 
     raise ValueError(
         f'field "{field_name}" not found in message "{mesg_name_or_num}"')
