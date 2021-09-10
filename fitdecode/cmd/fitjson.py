@@ -165,6 +165,10 @@ def parse_args(args=None):
         help='Do not output FIT local message definitions.')
 
     parser.add_argument(
+        '--nounk', action='store_true',
+        help='Do not output unknown FIT messages (e.g. "unknown_140")')
+
+    parser.add_argument(
         '--filter', '-f', action='append',
         help=(
             'Message name(s) (or global numbers) to filter-in or out, '
@@ -196,6 +200,13 @@ def main(args=None):
             for frame in fit:
                 if (options.nodef and
                         frame.frame_type == fitdecode.FIT_FRAME_DEFINITION):
+                    continue
+
+                if (options.nounk and
+                        frame.frame_type in (
+                            fitdecode.FIT_FRAME_DEFINITION,
+                            fitdecode.FIT_FRAME_DATA) and
+                        frame.mesg_type is None):
                     continue
 
                 if (options.filter and
