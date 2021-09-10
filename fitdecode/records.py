@@ -95,7 +95,7 @@ class FitDefinitionMessage:
 
     @property
     def name(self):
-        if self.mesg_type:
+        if self.mesg_type is not None:
             return self.mesg_type.name
         else:
             return f'unknown_{self.global_mesg_num}'

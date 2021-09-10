@@ -299,27 +299,27 @@ class FitReader:
     def _read_next(self):
 
         def _update_state():
-            if self._fd:
+            if self._fd is not None:
                 self._chunk_index += 1
                 self._chunk_offset += self._chunk_size
                 self._chunk_size = 0
 
-        while self._fd:
+        while self._fd is not None:
             assert self._chunk_size == 0
 
-            if not self._header:
+            if self._header is None:
                 assert self._body_bytes_left == 0
 
                 self._on_new_file()
                 self._read_header()
-                if not self._header:
+                if self._header is None:
                     break
 
                 yield self._header
                 _update_state()
 
             elif self._body_bytes_left > 0:
-                assert self._header
+                assert self._header is not None
 
                 record = self._read_record()
                 if not record:
@@ -332,7 +332,7 @@ class FitReader:
                 _update_state()
 
             else:
-                assert self._header
+                assert self._header is not None
                 assert self._body_bytes_left == 0
 
                 try:
