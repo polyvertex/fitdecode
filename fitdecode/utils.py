@@ -32,8 +32,8 @@ def scrub_method_name(method_name, convert_units=False):
 
 def get_mesg_type(mesg_name_or_num):
     """
-    Get a :class:`fitdecode.MessageType` from ``profile``, by its name or its
-    global number.
+    Get a :class:`fitdecode.MessageType` from ``profile``, by its name (`str`)
+    or its global number (`int`).
 
     Raise `ValueError` if type was not found.
     """
