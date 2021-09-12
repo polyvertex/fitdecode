@@ -5,6 +5,21 @@ Change Log
 ==========
 
 
+v0.10.0 (2021-09-12)
+====================
+
+* ``fitjson``: added ``--pretty`` option
+* ``fitjson``: added ``--nounk`` option to filter-out *unknown* messages
+* ``fitjson``: ``--filter`` option also allows to filter-out messages
+* ``fittxt``: ``--filter`` option also allows to filter-out messages
+* ``fittxt``: added ``--nounk`` option to filter-out *unknown* messages
+* Fixed: `FitReader` does not close a file-like object owned by the user
+* Fixed: `FitReader.file_id` gets reset upon FIT footer (CRC frame)
+* Fixed: `utils.get_mesg_num()` return value
+* Fixed: `utils.get_mesg_field_num()` return value
+* Minor corrections, improvements and code cleanup
+
+
 v0.9.0 (2021-09-10)
 ===================
 

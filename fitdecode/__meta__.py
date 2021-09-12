@@ -1,8 +1,8 @@
 # Copyright (c) Jean-Charles Lefebvre
 # SPDX-License-Identifier: MIT
 
-__version__ = '0.9.0'
-version_info = (0, 9, 0)
+__version__ = '0.10.0'
+version_info = (0, 10, 0)
 
 __title__ = 'fitdecode'
 __fancy_title__ = 'fitdecode'
