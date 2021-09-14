@@ -99,9 +99,10 @@ class DataProcessorBase:
             method(reader, data)
 
     def _resolve_method(self, method_name):
-        method = self._method_cache.get(method_name, False)
-        if method is not False:
-            return method
+        try:
+            return self._method_cache.get(method_name)
+        except KeyError:
+            pass
 
         scrubbed_method_name = scrub_method_name(method_name)
         method = getattr(self, scrubbed_method_name, None)
@@ -178,18 +179,16 @@ class DefaultDataProcessor(DataProcessorBase):
         Convert populated ``event_timestamp`` component values of the ``hr`` to
         `datetime.datetime` objects
         """
-        if not data_message.has_field(profile.FIELD_NUM_HR_EVENT_TIMESTAMP_12):
-            # We want to convert only populated *event_timestamp* fields that
-            # were originally computed from the *event_timestamp_12* value
-            return
-
-        for field_data in data_message.get_fields(
-                profile.FIELD_NUM_HR_EVENT_TIMESTAMP):
-            if field_data is not None:
-                field_data.value = datetime.datetime.fromtimestamp(
-                    FIT_UTC_REFERENCE + field_data.value,
-                    datetime.timezone.utc)
-                field_data.units = None  # units were 's', set to None
+        # We want to convert only populated *event_timestamp* fields that were
+        # originally computed from the *event_timestamp_12* value
+        if data_message.has_field(profile.FIELD_NUM_HR_EVENT_TIMESTAMP_12):
+            for field_data in data_message.get_fields(
+                    profile.FIELD_NUM_HR_EVENT_TIMESTAMP):
+                if field_data is not None:
+                    field_data.value = datetime.datetime.fromtimestamp(
+                        FIT_UTC_REFERENCE + field_data.value,
+                        datetime.timezone.utc)
+                    field_data.units = None  # units were 's', set to None
 
 
 class StandardUnitsDataProcessor(DefaultDataProcessor):

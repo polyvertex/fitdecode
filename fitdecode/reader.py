@@ -244,7 +244,7 @@ class FitReader:
     @property
     def last_timestamp(self):
         """
-        The last ``timestamp`` value (`int`).
+        The last ``timestamp`` value (`int` or `float`).
 
         Often useful in FIT files since some data fields rely on it like
         ``timestamp_16`` and ``timestamp_ms`` for instance.
