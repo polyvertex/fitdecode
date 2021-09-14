@@ -3,7 +3,6 @@
 
 import enum
 import io
-import os
 import struct
 import warnings
 

@@ -100,7 +100,7 @@ class DataProcessorBase:
 
     def _resolve_method(self, method_name):
         try:
-            return self._method_cache.get(method_name)
+            return self._method_cache[method_name]
         except KeyError:
             pass
 

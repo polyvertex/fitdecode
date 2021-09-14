@@ -126,7 +126,7 @@ def parse_filter_args(arg_parser, filter_opt):
                 msg = fitdecode.utils.get_mesg_num(msg)
             except ValueError:
                 try:
-                    msg = int(msg_name, base=0)
+                    msg = int(msg, base=0)
                 except ValueError:
                     msg = None
 
