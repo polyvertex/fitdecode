@@ -180,10 +180,10 @@ class FitReader:
         self._keep_raw = keep_raw_chunks
 
         # per-stream state (private)
-        self._fd = None        # the file object to read from
+        self._fd = None  # the file object to read from
         self._fd_owned = None  # do we own self._fd?
         self._read_offset = 0  # read cursor position in the file
-        self._read_size = 0    # count bytes read from this file so far in total
+        self._read_size = 0  # count bytes read from this file so far in total
         self._fit_file_index = -1  # the index of the current FIT file in this data stream  # noqa
 
         # per-chunk state (private)
@@ -193,11 +193,11 @@ class FitReader:
 
         # per-FIT-file state (private)
         self._crc = utils.CRC_START  # current CRC value, updated upon every read, reset on each new "FIT file"  # noqa
-        self._header = None          # `FitHeader` of the **current** "FIT file"
-        self._current_file_id = None # current file_id `FitDataMessage` object
-        self._body_bytes_left = 0    # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"  # noqa
-        self._local_mesg_defs = {}   # registry of every `FitDefinitionMessage` in this file so far  # noqa
-        self._local_dev_types = {}   # registry of developer types
+        self._header = None  # `FitHeader` of the **current** "FIT file"
+        self._current_file_id = None  # current file_id `FitDataMessage` object
+        self._body_bytes_left = 0  # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"  # noqa
+        self._local_mesg_defs = {}  # registry of every `FitDefinitionMessage` in this file so far  # noqa
+        self._local_dev_types = {}  # registry of developer types
         self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"  # noqa
         self._accumulators = {}
         self._last_timestamp = 0

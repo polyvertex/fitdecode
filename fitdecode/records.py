@@ -47,7 +47,8 @@ class FitHeader:
         self.body_size = body_size
         self.crc = crc  #: may be null
         self.crc_matched = crc_matched
-        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)  # noqa
+        #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
+        self.chunk = chunk
 
 
 class FitCRC:
@@ -58,7 +59,9 @@ class FitCRC:
     def __init__(self, crc, matched, chunk):
         self.crc = crc
         self.matched = matched
-        self.chunk = chunk  #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)  # noqa
+
+        #: `FitChunk` or `None` (depends on ``keep_raw_chunks`` option)
+        self.chunk = chunk
 
 
 class FitDefinitionMessage:
