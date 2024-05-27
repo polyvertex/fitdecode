@@ -159,8 +159,9 @@ class DefaultDataProcessor(DataProcessorBase):
             # This value was created on the device using its local timezone.
             # Unless we know that timezone, this value won't be correct.
             # However, if we assume UTC, at least it'll be consistent.
-            field_data.value = datetime.datetime.utcfromtimestamp(
-                FIT_UTC_REFERENCE + field_data.value)
+            field_data.value = datetime.datetime.fromtimestamp(
+                FIT_UTC_REFERENCE + field_data.value,
+                datetime.timezone.utc)
             field_data.units = None
 
     def process_type_localtime_into_day(self, reader, field_data):
