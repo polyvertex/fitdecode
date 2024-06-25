@@ -347,7 +347,17 @@ class FitReader:
                 assert self._body_bytes_left == 0
 
                 self._reset_per_fit_state()
-                self._read_header()
+                
+                try:
+                    self._read_header()
+                except FitHeaderError as e:
+                    if self.error_handling is ErrorHandling.RAISE:
+                        raise
+                    elif self.error_handling is ErrorHandling.WARN:
+                        warnings.warn(str(e))
+                    # Skip the bad header and continue to the next one
+                    _update_state()
+                    continue
                 if self._header is None:
                     break
 
