@@ -897,32 +897,35 @@ class FitReader:
             try:
                 raw_value = message.get_raw_value(raw_value_name)
             except KeyError as exc:
-                msg = (
-                    f'{str(exc)} (local_mesg_num: {message.local_mesg_num}; '
-                    f'chunk_offset: {self._chunk_offset})')
+                # assume some fields are optional (issues #22 and #24 at least)
+                if raw_value_name in (
+                        'developer_data_index', 'field_definition_number'):
+                    msg = (
+                        f'{str(exc)} (local_mesg_num: {message.local_mesg_num}; '
+                        f'chunk_offset: {self._chunk_offset})')
 
-                if self.error_handling is ErrorHandling.RAISE:
-                    raise FitParseError(self._chunk_offset, msg)
-                elif self.error_handling is ErrorHandling.WARN:
-                    msg += '; adding dummy dev data...'
-                    warnings.warn(msg)
-                else:
-                    assert self.error_handling is ErrorHandling.IGNORE
+                    if self.error_handling is ErrorHandling.RAISE:
+                        raise FitParseError(self._chunk_offset, msg)
+                    elif self.error_handling is ErrorHandling.WARN:
+                        msg += '; adding dummy dev data...'
+                        warnings.warn(msg)
+                    else:
+                        assert self.error_handling is ErrorHandling.IGNORE
 
                 raw_value = None
-            else:
-                if raw_value_name == 'developer_data_index':
-                    if raw_value is not None:
-                        raw_value = int(raw_value)
-                    if raw_value not in self._local_dev_types:
-                        raise FitParseError(
-                            self._chunk_offset,
-                            f'developer_data_index {raw_value} not defined')
-                elif raw_value_name == 'fit_base_type_id':
-                    if raw_value is None:
-                        raw_value = types.BASE_TYPE_BYTE
-                    else:
-                        raw_value = types.BASE_TYPES[raw_value]
+
+            if raw_value_name == 'developer_data_index':
+                if raw_value is not None:
+                    raw_value = int(raw_value)
+                if raw_value not in self._local_dev_types:
+                    raise FitParseError(
+                        self._chunk_offset,
+                        f'developer_data_index {raw_value} not defined')
+            elif raw_value_name == 'fit_base_type_id':
+                if raw_value is None:
+                    raw_value = types.BASE_TYPE_BYTE
+                else:
+                    raw_value = types.BASE_TYPES[raw_value]
 
             adfdi_args.append(raw_value)
 
