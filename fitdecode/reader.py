@@ -911,13 +911,13 @@ class FitReader:
 
                 raw_value = None
             else:
-                if raw_value_name == 'dev_data_index':
+                if raw_value_name == 'developer_data_index':
                     if raw_value is not None:
                         raw_value = int(raw_value)
                     if raw_value not in self._local_dev_types:
                         raise FitParseError(
                             self._chunk_offset,
-                            f'dev_data_index {raw_value} not defined')
+                            f'developer_data_index {raw_value} not defined')
                 elif raw_value_name == 'fit_base_type_id':
                     if raw_value is None:
                         raw_value = types.BASE_TYPE_BYTE
