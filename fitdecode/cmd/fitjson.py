@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # Copyright (c) Jean-Charles Lefebvre
 # SPDX-License-Identifier: MIT
 

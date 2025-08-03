@@ -26,11 +26,11 @@
             "selector": "source.python",
 
             "env": {"PYTHONIOENCODING": "utf-8"},
-            "cmd": ["/usr/bin/env", "python3", "-B", "-m", "flake8", "$file"],
+            "cmd": ["/usr/bin/env", "python", "-B", "-m", "flake8", "$file"],
 
             "windows":
             {
-                "cmd": ["cmd.exe", "/C", "python3", "-B", "-m", "flake8", "$file"]
+                "cmd": ["cmd.exe", "/C", "python", "-B", "-m", "flake8", "$file"]
             }
         },
 
@@ -48,11 +48,11 @@
             "word_wrap": false,
 
             "env": {"PYTHONIOENCODING": "utf-8"},
-            "cmd": ["/usr/bin/env", "python3", "-B", "-m", "flake8"],
+            "cmd": ["/usr/bin/env", "python", "-B", "-m", "flake8"],
 
             "windows":
             {
-                "cmd": ["cmd.exe", "/C", "python3", "-B", "-m", "flake8"]
+                "cmd": ["cmd.exe", "/C", "python", "-B", "-m", "flake8"]
             }
         },
 
@@ -64,11 +64,11 @@
             "word_wrap": false,
 
             "env": {"PYTHONIOENCODING": "utf-8"},
-            "cmd": ["/usr/bin/env", "python3", "-B", "setup.py", "test"],
+            "cmd": ["/usr/bin/env", "python", "-B", "setup.py", "test"],
 
             "windows":
             {
-                "cmd": ["cmd.exe", "/C", "python3", "-B", "setup.py", "test"]
+                "cmd": ["cmd.exe", "/C", "python", "-B", "setup.py", "test"]
             }
         }
     ]

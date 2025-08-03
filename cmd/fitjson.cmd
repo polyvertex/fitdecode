@@ -1,2 +1,2 @@
-@call python3 -B "%~dpn0" %*
+@call python -B "%~dpn0" %*
 @exit /b %ERRORLEVEL%
