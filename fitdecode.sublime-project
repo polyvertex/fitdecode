@@ -5,71 +5,63 @@
             "path": ".",
             "folder_exclude_patterns":
             [
-                "build",
-                "dist",
-                "docs/_build",
-                "__pycache__",
+                "//build/",
+                "//dist/",
+                "//docs/_build",
+                "__pycache__/",
+                ".pytest_cache/",
+                ".ruff_cache/",
                 "*.egg-info"
+            ],
+            "file_exclude_patterns":
+            [
+                "*.bz2",
+                "*.egg-info",
+                "*.gz",
+                "*.tar",
+                "*.tgz",
+                "*.xz",
+                "*.zip",
+                "*.zst"
             ]
         }
     ],
-
+    "settings":
+    {
+        "default_line_ending": "unix",
+        "default_encoding": "UTF-8",
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true,
+        "trim_automatic_white_space": true,
+        "trim_trailing_white_space_on_save": true
+    },
     "build_systems":
     [
-        // Code Style - Active File
         {
-            "name": "Code Style - Active File",
-            "working_dir": "$project_path",
-            "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
-            "quiet": true,
-            "word_wrap": false,
+            "name": "flake8 - file",
             "selector": "source.python",
-
-            "env": {"PYTHONIOENCODING": "utf-8"},
-            "cmd": ["/usr/bin/env", "python", "-B", "-m", "flake8", "$file"],
-
-            "windows":
-            {
-                "cmd": ["cmd.exe", "/C", "python", "-B", "-m", "flake8", "$file"]
-            }
-        },
-
-        // Code Style - Full Project
-        //
-        // A new build system has to be declared for this instead of just
-        // declaring it as a variant of the one above because Sublime does not
-        // seem to support the "selector" on a per-variant basis. At least not
-        // in build 3143.
-        {
-            "name": "Code Style - Full Project",
+            "quiet": true,
+            "word_wrap": false,
             "working_dir": "$project_path",
             "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
-            "quiet": true,
-            "word_wrap": false,
-
-            "env": {"PYTHONIOENCODING": "utf-8"},
-            "cmd": ["/usr/bin/env", "python", "-B", "-m", "flake8"],
-
-            "windows":
-            {
-                "cmd": ["cmd.exe", "/C", "python", "-B", "-m", "flake8"]
-            }
+            "cmd": ["python", "-B", "-m", "flake8", "$file"]
         },
-
-        // UnitTest
         {
-            "name": "fitdecode - UnitTest",
-            "working_dir": "$project_path",
+            "name": "flake8 - project",
+            "selector": null,
             "quiet": true,
             "word_wrap": false,
-
-            "env": {"PYTHONIOENCODING": "utf-8"},
-            "cmd": ["/usr/bin/env", "python", "-B", "setup.py", "test"],
-
-            "windows":
-            {
-                "cmd": ["cmd.exe", "/C", "python", "-B", "setup.py", "test"]
-            }
+            "working_dir": "$project_path",
+            "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
+            "cmd": ["python", "-B", "-m", "flake8"]
+        },
+        {
+            "name": "unit tests",
+            "selector": null,
+            "quiet": true,
+            "word_wrap": false,
+            "working_dir": "$project_path",
+            "cmd": ["python", "-B", "-m", "pytest"]
         }
     ]
 }

@@ -1,0 +1,38 @@
+# project specifics
+openpyxl
+
+# code quality: ruff
+# ruff
+
+# code quality: flake8 and plugins
+# note that flake8 installs pycodestyle, pyflakes, and mccabe by default, but
+# explicit is better than implicit
+flake8
+flake8-pyproject
+pycodestyle
+pyflakes
+mccabe
+flake8-bugbear
+flake8-import-order
+flake8-noqa
+flake8-ruff
+dlint
+
+# code quality: pylint
+# pylint
+
+# unit testing
+pytest
+
+# docs
+sphinx
+sphinx_rtd_theme
+
+# packaging
+setuptools >= 61.0.0
+build
+check_manifest >= 0.48
+readme_renderer >= 33.0
+
+# releasing
+twine

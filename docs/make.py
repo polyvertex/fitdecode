@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Copyright (c) Jean-Charles Lefebvre
+# SPDX-License-Identifier: MIT
 
 import argparse
 import contextlib

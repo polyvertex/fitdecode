@@ -1,0 +1,57 @@
+[flake8]
+# flake8 options
+# requires flake8-pyproject
+
+require-plugins =
+    pycodestyle,
+    pyflakes,
+    mccabe,
+    flake8-bugbear,
+    flake8-import-order,
+    flake8-noqa,
+    flake8-ruff,
+    dlint
+
+# default: E, F, W, C90
+# B    flake8-bugbear
+# C90  C901: mccabe
+# D    dlint
+# E    pycodestyle
+# F    flake8
+# I    flake8-import-order
+# NQA  flake8-noqa
+# RUF  flake8-ruff
+# W    pycodestyle
+select = B,C90,D,E,F,I,NQA,RUF,W
+
+max-line-length = 88
+max-doc-length = 88
+statistics = True
+
+extend-exclude =
+    docs/,
+    fitdecode/__init__.py,
+    fitdecode/profile.py,
+    tests/test_reader.py,
+    tmp/,
+    tools/generate_profile.py
+
+ignore =
+    # DUO138 catastrophic "re" usage - denial-of-service possible
+    # I101 imported names are in the wrong order
+    # W503 line break before binary operator
+    # W504 line break after binary operator
+    W503,W504
+
+per-file-ignores =
+    # F401 Module imported but unused
+    # F403 'from module import *' used; unable to detect undefined names
+    # I201 Missing newline between import groups
+    fitdecode/__init__.py: I,F401,F403
+
+# flake8-noqa options
+noqa-require-code = True
+noqa-include-name = True
+
+# mccabe options
+max-complexity = 25

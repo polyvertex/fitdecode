@@ -64,7 +64,7 @@ extlinks = {
     'ghu': ('https://github.com/%s', '@')}
 
 # ext.intersphinx config
-intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 
 # ext.todo config
 todo_include_todos = True

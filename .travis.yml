@@ -1,19 +1,27 @@
 language: python
 
-# as per travis docs:
-# "Python builds are not available on the macOS and Windows environments."
+# * "Python builds are not available on Windows environments."
+# * "Starting April 1st, 2025, OSx/macOS builds will no longer be supported due
+#   to the end-of-life (EOL) of VMWare support for macOS infrastructure."
 os:
   - linux
   # - osx
   # - windows
 
 python:
-  - 3.6
-  - 3.7
-  - 3.8
-  - 3.9
-  - pypy3
+  - "3.10"
+  - "3.11"
+  - "3.12"
+  - "3.13"
+  - "pypy3"
+
+before_install:
+  - python -m pip install -U pip
+
+install:
+  - python -m pip install -r requirements.in
+  - python -m pip install -r requirements-dev.in
 
 script:
   - python --version
-  - python setup.py test
+  - python -m pytest

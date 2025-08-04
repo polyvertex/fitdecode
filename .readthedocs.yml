@@ -1,19 +1,14 @@
 version: 2
 
 python:
-  # the following config does:
-  #   $ pip install .[docs]
-  #   $ python setup.py install
   install:
+    - requirements: requirements.in
+    - requirements: requirements-dev.in
     - method: pip
-      path: .
-      extra_requirements:
-        - docs
-    - method: setuptools
       path: .
 
 build:
-  os: ubuntu-22.04
+  os: ubuntu-24.04
   tools:
     python: "3"
 

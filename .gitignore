@@ -1,10 +1,91 @@
+# development and testing
+/tmp/
+/t.*
+/t[0-9]
+/t[0-9].*
+
+# python auto-generated
 /build/
 /dist/
-/docs/_build/
-/tmp/
-
-*.sublime-workspace
-
 __pycache__/
+.mypy_cache/
+.pytest_cache/
 *.egg-info/
 *.pyc
+
+# python sphinx output
+/docs/_build/
+
+# ruff cache dir
+.ruff_cache/
+
+# python environments
+.[Ee][Nn][Vv]/
+.[Vv][Ee][Nn][Vv]/
+.[Ee][Nn][Vv].[Bb][Aa][Kk]/
+.[Vv][Ee][Nn][Vv].[Bb][Aa][Kk]/
+[Ee][Nn][Vv]/
+[Vv][Ee][Nn][Vv]/
+[Ee][Nn][Vv].[Bb][Aa][Kk]/
+[Vv][Ee][Nn][Vv].[Bb][Aa][Kk]/
+
+# python unit testing and coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# sublimetext
+*.sublime-workspace
+
+# vscode
+.vscode/*
+!.vscode/settings.json
+# !.vscode/tasks.json
+# !.vscode/launch.json
+# !.vscode/extensions.json
+*.code-workspace
+.history/
+
+# vim
+*~
+[._]*.s[a-v][a-z]
+!*.svg
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+[._]*.un~
+
+# linux
+.Trash-*
+.fuse_hidden*
+.directory
+
+# windows
+Thumbs.db
+Thumbs.db:encryptable
+[Dd]esktop.ini
+
+# macos
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon??
+._*
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk

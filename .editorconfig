@@ -2,12 +2,18 @@
 root = true
 
 [*]
+charset = utf-8
+end_of_line = lf
 indent_style = space
 indent_size = 4
-end_of_line = lf
-charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{md,rst,txt}]
+[*.{bat,cmd}]
+end_of_line = crlf
+
+[*.{md,rst,toml,txt,yaml,yml}]
+indent_size = 2
+
+[{README,TODO}]
 indent_size = 2
