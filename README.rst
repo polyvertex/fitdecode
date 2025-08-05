@@ -11,7 +11,7 @@ fitdecode
 
 
 A `FIT <https://developer.garmin.com/fit/overview/>`_ file parsing and decoding
-library written in `Python <https://www.python.org/>`_ (``>= 3.10``).
+library written in `Python <https://www.python.org/>`_ (``>= 3.6``).
 
 
 Usage Example
@@ -41,14 +41,14 @@ Read a FIT file, frame by frame:
 Command line utilities
 ----------------------
 
-``fitjson`` exports JSON:
+``fitjson`` command converts a FIT file to JSON:
 
 ::
 
     $ fitjson --pretty -o out_file.json in_file.fit
 
-To ease the introspection or your FIT files, ``fittxt`` exports to a dedicated
-TXT format::
+``fittxt`` command converts a FIT file to human-readable text format convenient
+to ease FIT data inspection and debugging::
 
     $ fittxt -o out_file.txt in_file.fit
 
@@ -70,42 +70,41 @@ fitdecode is available on `PyPI <https://pypi.org/project/fitdecode/>`_::
     $ pip install fitdecode
 
 
-Or, to get the latest working version, you can clone fitdecode's `source code
-repository <https://github.com/polyvertex/fitdecode>`_ before installing it::
+Or, you can clone fitdecode's `source code repository
+<https://github.com/polyvertex/fitdecode>`_ before installing it::
 
     $ git clone git@github.com:polyvertex/fitdecode.git
     $ cd fitdecode
-    $ python setup.py test     # optional step to run unit tests
-    $ python setup.py install
+    $ pip install .
 
 
-Note that for convenience, the ``cmd`` directory located at the root of the
-source code tree can safely be added to your ``PATH``, so that fitdecode
-commands can be called without the package to be installed.
+Note that for convenience, directory ``cmd`` located at the root of the project
+can safely be added to your ``PATH``, such that fitdecode commands can be called
+without the package to be installed.
 
 
 Overview
 ========
 
-fitdecode is a non offensive and incompatible rewrite of the fitparse_ library,
-with some improvements and additional features, as well as efforts made to
+fitdecode is a non-offensive and incompatible rewrite of the fitparse_ library,
+with some improvements and additional features, thread-safety, and efforts to
 optimize both speed and memory usage.
 
 Main differences between fitdecode and fitparse:
 
-* fitdecode's API is not compatible with fitparse's
+* fitdecode API is not compatible with fitparse
 * fitdecode is faster
-* fitdecode allows concurrent reading of multiple files by being thread-safe, in
-  the sense that fitdecode's objects keep their state stored locally
-* fitdecode does not discard the FIT header and the CRC footer while iterating
-  a file, which allow to get a complete 1:1 representation of the file that is
-  being read
-* This also allows the client to easily deal with so-called chained FIT files,
+* fitdecode allows concurrent reading of multiple streams by being thread-safe,
+  in the sense that fitdecode's objects keep their state stored locally
+* fitdecode does not discard the FIT header and the CRC footer while reading a
+  stream so that client code gets a complete 1:1 representation of the stream
+  that is being read
+* This also allows client code to easily deal with so-called chained FIT files,
   as per FIT SDK definition (i.e. concatenated FIT files)
 * CRC computation and matching are both optional. CRC can be either matched, or
   only computed, or just ignored for faster reading.
 * fitdecode offers optional access to records, headers and footers in their
-  binary form, to allow FIT file cutting, stitching and filtering at binary
+  binary form, so to allow FIT file cutting, stitching and filtering at binary
   level
 
 

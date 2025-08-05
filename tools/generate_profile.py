@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 #
-# NOTE: this script originally comes from python-fitparse v1.0.1, and has since
-# been slightly corrected and improved.
+# Note:
+# Script originally copied from python-fitparse v1.0.1, it has since been
+# slightly corrected and improved. Some modifications have been merged upstream.
 #
-#
+# Original comment:
 # Horrible, dirty, ugly, awful, and terrible script to export the Profile.xls
 # that comes with the FIT SDK to the Python data structures in profile.py. You
 # shouldn't have to use this unless you're developing python-fitparse.
-#
-# You can download the SDK at https://www.thisisant.com/
-#
-# WARNING: This is only known to work with FIT SDK versions up to 5.10
 #
 
 import datetime
