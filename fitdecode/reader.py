@@ -6,12 +6,12 @@ import io
 import struct
 import warnings
 
-from .exceptions import FitHeaderError, FitCRCError, FitEOFError, FitParseError
+from . import processors
+from . import profile
 from . import records
 from . import types
 from . import utils
-from . import processors
-from . import profile
+from .exceptions import FitCRCError, FitEOFError, FitHeaderError, FitParseError
 
 __all__ = ['CrcCheck', 'ErrorHandling', 'FitReader']
 
@@ -183,21 +183,21 @@ class FitReader:
         self._fd_owned = None  # do we own self._fd?
         self._read_offset = 0  # read cursor position in the file
         self._read_size = 0  # count bytes read from this file so far in total
-        self._fit_file_index = -1  # the index of the current FIT file in this data stream  # noqa
+        self._fit_file_index = -1  # the index of the current FIT file in this data stream  # noqa: E501
 
         # per-chunk state (private)
-        self._chunk_index = 0   # the index number of the current chunk that is currently being read  # noqa
-        self._chunk_offset = 0  # the offset of the current chunk (relative to `read_offset`)  # noqa
+        self._chunk_index = 0   # the index number of the current chunk that is currently being read  # noqa: E501
+        self._chunk_offset = 0  # the offset of the current chunk (relative to `read_offset`)  # noqa: E501
         self._chunk_size = 0    # the size of the current chunk
 
         # per-FIT-file state (private)
-        self._crc = utils.CRC_START  # current CRC value, updated upon every read, reset on each new "FIT file"  # noqa
+        self._crc = utils.CRC_START  # current CRC value, updated upon every read, reset on each new "FIT file"  # noqa: E501
         self._header = None  # `FitHeader` of the **current** "FIT file"
         self._current_file_id = None  # current file_id `FitDataMessage` object
-        self._body_bytes_left = 0  # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"  # noqa
-        self._local_mesg_defs = {}  # registry of every `FitDefinitionMessage` in this file so far  # noqa
+        self._body_bytes_left = 0  # the number of bytes that are still to read before reaching the CRC footer of the current "FIT file"  # noqa: E501
+        self._local_mesg_defs = {}  # registry of every `FitDefinitionMessage` in this file so far  # noqa: E501
         self._local_dev_types = {}  # registry of developer types
-        self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"  # noqa
+        self._compressed_ts_accumulator = 0  # state value for the so-called "Compressed Timestamp Header"  # noqa: E501
         self._accumulators = {}
         self._last_timestamp = 0
         self._hr_start_timestamp = 0  # special case for the ``hr`` message
@@ -554,7 +554,7 @@ class FitReader:
         dev_field_defs = []
 
         # read field definitions
-        for idx in range(num_fields):
+        for _ in range(num_fields):
             extra_chunk = self._read_bytes(field_unpacker.size)
             record_chunks.append(extra_chunk)
 
@@ -606,7 +606,7 @@ class FitReader:
             num_dev_fields = extra_chunk[0]
 
             # read field definitions
-            for idx in range(num_dev_fields):
+            for _ in range(num_dev_fields):
                 extra_chunk = self._read_bytes(field_unpacker.size)
                 record_chunks.append(extra_chunk)
 
@@ -863,7 +863,7 @@ class FitReader:
             dev_data_index = int(dev_data_index)
         except KeyError as exc:
             msg = (
-                f'{str(exc)} (local_mesg_num: {message.local_mesg_num}; '
+                f'{exc} (local_mesg_num: {message.local_mesg_num}; '
                 f'chunk_offset: {self._chunk_offset})')
 
             if self.error_handling is ErrorHandling.RAISE:
@@ -901,7 +901,7 @@ class FitReader:
                 if raw_value_name in (
                         'developer_data_index', 'field_definition_number'):
                     msg = (
-                        f'{str(exc)} (local_mesg_num: {message.local_mesg_num}; '
+                        f'{exc} (local_mesg_num: {message.local_mesg_num}; '
                         f'chunk_offset: {self._chunk_offset})')
 
                     if self.error_handling is ErrorHandling.RAISE:

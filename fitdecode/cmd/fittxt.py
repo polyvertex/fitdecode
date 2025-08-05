@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
-from collections import OrderedDict
 import datetime
 import decimal
 import os.path
 import re
 import sys
 import traceback
+from collections import OrderedDict
 
 import fitdecode
 

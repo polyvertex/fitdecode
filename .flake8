@@ -37,11 +37,10 @@ extend-exclude =
     tools/generate_profile.py
 
 ignore =
-    # DUO138 catastrophic "re" usage - denial-of-service possible
-    # I101 imported names are in the wrong order
+    # B028 No explicit stacklevel argument found for warnings.warn()
     # W503 line break before binary operator
     # W504 line break after binary operator
-    W503,W504
+    B028,W503,W504
 
 per-file-ignores =
     # F401 Module imported but unused
