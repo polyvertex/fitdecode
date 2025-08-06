@@ -6,8 +6,9 @@ fitdecode
     :target: https://fitdecode.readthedocs.io/
     :alt: Latest Docs
 
-.. image:: https://api.travis-ci.com/polyvertex/fitdecode.svg
-    :target: https://app.travis-ci.com/github/polyvertex/fitdecode
+.. image:: https://github.com/polyvertex/fitdecode/actions/workflows/python-test.yml/badge.svg
+    :target: https://github.com/polyvertex/fitdecode/actions/workflows/python-test.yml
+    :alt: python-test
 
 
 A `FIT <https://developer.garmin.com/fit/overview/>`_ file parsing and decoding
