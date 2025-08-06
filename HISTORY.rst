@@ -5,6 +5,23 @@ Change Log
 ==========
 
 
+v0.11.0 (2025-08-06)
+====================
+
+* FIT SDK profile upgraded to v21.171.0
+* Fixed: decoding of ``developer_data_index`` field which was not converted to
+  an ``int`` due to a typo
+* Most of FIT so-called developer fields are now considered optional (should
+  fix #22 and #24)
+* Support of ``localtime`` fields set to out-of-bound value ``86400`` (thanks to
+  @maethub, see python-fitparse#138)
+* ``generate_profile`` utility now supports latests FIT SDK Zip archive layout
+  and ``Profile.xlsx`` file format (thanks to @fundthmcalculus, see
+  python-fitparse#134)
+* Minor corrections due to stricter flake8 settings (code quality)
+* Overhaul of project files and C/I
+
+
 v0.10.0 (2021-09-12)
 ====================
 
