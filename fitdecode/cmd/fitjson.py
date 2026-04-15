@@ -5,6 +5,7 @@
 import argparse
 import datetime
 import json
+import os.path
 import re
 import sys
 import traceback
@@ -146,7 +147,7 @@ def parse_args(args=None):
         allow_abbrev=False)
 
     parser.add_argument(
-        '--output', '-o', type=argparse.FileType(mode='wt', encoding='utf-8'),
+        '--output', '-o',
         default='-',
         help='File to output data into (defaults to stdout)')
 
@@ -158,7 +159,7 @@ def parse_args(args=None):
         '--nocrc', action='store_const',
         const=fitdecode.CrcCheck.DISABLED,
         default=fitdecode.CrcCheck.WARN,
-        help='Some devices seem to write invalid CRC\'s, ignore these.')
+        help="Some devices seem to write invalid CRC's, ignore these.")
 
     parser.add_argument(
         '--nodef', action='store_true',
@@ -176,12 +177,25 @@ def parse_args(args=None):
             'messages; "+file_id" or "file_id" to include file_id messages.'))
 
     parser.add_argument(
-        'infile', metavar='FITFILE', type=argparse.FileType(mode='rb'),
+        'infile', metavar='FITFILE',
         help='Input .FIT file (use - for stdin)')
 
     options = parser.parse_args(args)
     options.filter, options.default_filter = \
         parse_filter_args(parser, options.filter)
+
+    # Resolve input file: '-' means stdin, otherwise a file path
+    if options.infile == '-':
+        options.infile = sys.stdin.buffer
+    else:
+        if not os.path.isfile(options.infile):
+            parser.error(f'file not found: "{options.infile}"')
+
+    # Resolve output file: '-' means stdout, otherwise open for writing
+    if options.output == '-':
+        options.output = sys.stdout
+    else:
+        options.output = open(options.output, mode='wt', encoding='utf-8')
 
     return options
 
