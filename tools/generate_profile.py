@@ -145,7 +145,7 @@ class TypeInfo(namedtuple('TypeInfo', ('name', 'base_type', 'enum', 'comment')))
         )
         if self.enum:
             s += "    enum={\n"
-            for value in sorted(self.enum, key=lambda x: x.value if isinstance(x.value, int) else int(x.value, 16)):
+            for value in sorted(self.enum, key=lambda x: x.value if isinstance(x.value, int) else int(str(x.value), 0)):
                 s += "        %s\n" % (value,)
             s += "    },\n"
         s += ")"
@@ -397,7 +397,7 @@ def parse_types(types_rows):
 
         else:
             # No first column means a value for this type
-            value = TypeValueInfo(name=row[2].decode(), value=maybe_decode(row[3]), comment=default_comment(row[4]))
+            value = TypeValueInfo(name=row[2].decode(), value=coerce_int(maybe_decode(row[3])), comment=default_comment(row[4]))
 
             if value.name and value.value is not None:
                 # Don't add ignore keyed types
@@ -415,6 +415,18 @@ def maybe_decode(o):
     if isinstance(o, bytes):
         return o.decode()
     return o
+
+
+def coerce_int(value):
+    """Convert a value to int if it looks numeric (decimal or hex string)."""
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        try:
+            return int(value, 0)
+        except (ValueError, TypeError):
+            pass
+    return value
 
 
 def default_comment(x):
@@ -468,7 +480,7 @@ def parse_messages(messages_rows, type_list):
             # Not a subfield if first row has definition num
             if row[1] is not None and row[1] != b'':
                 field = FieldInfo(
-                    name=row[2].decode(), type=row[3].decode(), num=maybe_decode(row[1]), scale=fix_scale(row[6]),
+                    name=row[2].decode(), type=row[3].decode(), num=coerce_int(maybe_decode(row[1])), scale=fix_scale(row[6]),
                     offset=maybe_decode(row[7]), units=fix_units(default_comment(row[8])), components=[],
                     subfields=[], comment=default_comment(row[13]),
                 )
