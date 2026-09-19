@@ -52,6 +52,9 @@ class ErrorHandling(enum.Enum):
     """
     Defines the values expected by the ``error_handling`` parameter of
     `FitReader`'s constructor.
+
+    Unrecoverable errors, such as zero-sized field definitions, raise
+    `FitParseError` in every mode.
     """
 
     #: Disable developer types checking and other parsing error due to malformed
@@ -561,6 +564,12 @@ class FitReader:
             field_def_num, field_size, base_type_num = \
                 field_unpacker.unpack(extra_chunk)
 
+            if field_size == 0:
+                raise FitParseError(
+                    self._chunk_offset,
+                    f'invalid field size 0 for field {field_def_num} '
+                    'in definition message (expected a positive size)')
+
             field = mesg_type.fields.get(field_def_num) if mesg_type else None
             base_type = types.BASE_TYPES.get(
                 base_type_num, types.BASE_TYPE_BYTE)
@@ -612,6 +621,12 @@ class FitReader:
 
                 field_def_num, field_size, dev_data_index = \
                     field_unpacker.unpack(extra_chunk)
+
+                if field_size == 0:
+                    raise FitParseError(
+                        self._chunk_offset,
+                        f'invalid field size 0 for developer field {field_def_num} '
+                        'in definition message (expected a positive size)')
 
                 field = self._get_dev_type(
                     record_header.local_mesg_num, global_mesg_num,

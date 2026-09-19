@@ -9,6 +9,7 @@ import hashlib
 import os.path
 import struct
 import unittest
+import warnings
 
 import fitdecode
 
@@ -191,6 +192,88 @@ class FitReaderTestCase(unittest.TestCase):
             _invalid_test_file('elemnt-bolt-no-application-id-inside-developer-data-id.fit'),
             check_crc=fitdecode.CrcCheck.RAISE,
             keep_raw_chunks=True))
+
+    def test_fitparse_zero_sized_field_definition(self):
+        offset = len(_generate_fitfile()) - 2
+        for mode in fitdecode.ErrorHandling:
+            for endian in ('<', '>'):
+                for base_type in ('uint32', 'byte', 'string'):
+                    with self.subTest(mode=mode, endian=endian, base_type=base_type):
+                        definition = bytearray(_generate_messages(
+                            20, 1, [(253, base_type)], endian=endian))
+                        definition[7] = 0
+                        # No data message: reject the definition itself.
+                        with fitdecode.FitReader(
+                                _generate_fitfile(definition),
+                                error_handling=mode,
+                                check_crc=fitdecode.CrcCheck.RAISE) as fit:
+                            frames = iter(fit)
+                            for _ in range(3):
+                                next(frames)
+                            with self.assertRaisesRegex(
+                                    fitdecode.FitParseError,
+                                    'invalid field size 0 for field 253') as exc:
+                                next(frames)
+                            self.assertEqual(exc.exception.offset, offset)
+
+    def test_fitparse_zero_sized_developer_field_definition(self):
+        developer = _generate_messages(
+            207, 1, [(3, 'uint8')], data=[[0]])
+        developer += _generate_messages(
+            206, 1, [(0, 'uint8'), (1, 'uint8'), (2, 'uint8')],
+            data=[[0, 1, 0x86]])
+        offset = len(_generate_fitfile(developer)) - 2
+        for mode in fitdecode.ErrorHandling:
+            for endian in ('<', '>'):
+                with self.subTest(mode=mode, endian=endian):
+                    definition = struct.pack(
+                        f'{endian}BBBHB', 0x61, 0, int(endian == '>'), 20, 0)
+                    # One developer field: number 1, size 0, developer index 0.
+                    definition += bytes([1, 1, 0, 0])
+                    with fitdecode.FitReader(
+                            _generate_fitfile(developer + definition),
+                            error_handling=mode,
+                            check_crc=fitdecode.CrcCheck.RAISE) as fit:
+                        frames = iter(fit)
+                        for _ in range(7):
+                            next(frames)
+                        with self.assertRaisesRegex(
+                                fitdecode.FitParseError,
+                                'invalid field size 0 for developer field 1') as exc:
+                            next(frames)
+                        self.assertEqual(exc.exception.offset, offset)
+
+    def test_fitparse_empty_definition(self):
+        for mode in fitdecode.ErrorHandling:
+            with self.subTest(mode=mode):
+                data = _generate_messages(20, 1, []) + bytes([1])
+                with fitdecode.FitReader(
+                        _generate_fitfile(data), error_handling=mode,
+                        check_crc=fitdecode.CrcCheck.RAISE) as fit:
+                    frames = tuple(fit)
+                self.assertEqual(frames[-2].fields, [])
+                self.assertEqual(frames[-2].global_mesg_num, 20)
+
+    def test_fitparse_positive_misaligned_field_size(self):
+        definition = bytearray(_generate_messages(20, 1, [(250, 'uint32')]))
+        definition[7] = 2
+        data = definition + bytes([1, 5, 6])
+        for mode in fitdecode.ErrorHandling:
+            with self.subTest(mode=mode):
+                with fitdecode.FitReader(
+                        _generate_fitfile(data), error_handling=mode,
+                        check_crc=fitdecode.CrcCheck.RAISE) as fit:
+                    if mode is fitdecode.ErrorHandling.RAISE:
+                        with self.assertRaisesRegex(
+                                fitdecode.FitParseError, 'invalid field size 2'):
+                            tuple(fit)
+                    else:
+                        with warnings.catch_warnings(record=True) as caught:
+                            warnings.simplefilter('always')
+                            frames = tuple(fit)
+                        self.assertEqual(frames[-2].get_raw_value(250), (5, 6))
+                        self.assertEqual(
+                            len(caught), int(mode is fitdecode.ErrorHandling.WARN))
 
     def test_fitparse_basic_file_with_one_record(self, endian='<'):
         fit = tuple(fitdecode.FitReader(
