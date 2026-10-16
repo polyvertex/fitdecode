@@ -365,7 +365,12 @@ class FitReader:
                     records.FitDefinitionMessage,
                     records.FitDataMessage))
 
-                assert self._chunk_size <= self._body_bytes_left
+                if self._chunk_size > self._body_bytes_left:
+                    raise FitParseError(
+                        self._chunk_offset,
+                        f'header data size is {self._header.body_size} bytes, '
+                        f'but this record needs {self._chunk_size} bytes and '
+                        f'only {self._body_bytes_left} are left')
                 self._body_bytes_left -= self._chunk_size
 
                 yield record

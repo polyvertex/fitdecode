@@ -156,6 +156,28 @@ class FitReaderTestCase(unittest.TestCase):
         except fitdecode.FitEOFError:
             pass
 
+    def test_fitparse_header_data_size_ends_inside_record(self):
+        """
+        A header data size that ends inside a record raises FitParseError naming
+        the size, instead of an AssertionError
+        """
+        fit_data = bytearray(_generate_fitfile())
+
+        # the data size is bytes 4-7 of the 14-byte header: shrink it by one
+        # byte, and recompute the header CRC (bytes 12-13) to keep it valid
+        (data_size, ) = struct.unpack_from('<I', fit_data, 4)
+        struct.pack_into('<I', fit_data, 4, data_size - 1)
+        struct.pack_into(
+            '<H', fit_data, 12,
+            fitdecode.utils.compute_crc(bytes(fit_data[:12])))
+
+        with self.assertRaisesRegex(
+                fitdecode.FitParseError,
+                f'data size is {data_size - 1} bytes'):
+            tuple(fitdecode.FitReader(
+                bytes(fit_data),
+                check_crc=fitdecode.CrcCheck.RAISE))
+
     def test_fitparse_invalid_chained_files(self):
         """Detect errors when files are chained - concatenated - together"""
         try:
