@@ -46,7 +46,11 @@ class _FieldAndSubFieldBase:
         return isinstance(self.type, BaseType)
 
     def render(self, raw_value):
-        if self.type.enum and (raw_value in self.type.enum):
+        # These profile entries name bit masks rather than complete values.
+        if (self.type.enum and raw_value in self.type.enum
+                and self.type.name not in (
+                    'left_right_balance', 'left_right_balance_100',
+                    'message_index')):
             return self.type.enum[raw_value]
         return raw_value
 

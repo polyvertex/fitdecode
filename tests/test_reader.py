@@ -480,6 +480,24 @@ class FitReaderTestCase(unittest.TestCase):
 
         csv_fp.close()
 
+    def test_bit_masks_remain_numeric(self):
+        cases = (
+            (20, 30, 'uint8', (0x7F, 0x80, 0x80 | 50)),
+            (18, 37, 'uint16', (0x3FFF, 0x8000, 0x8000 | 5000)),
+            (19, 71, 'uint16', (0x0FFF, 0x7000, 0x8000, 0x8001)),
+        )
+        for mesg_num, field_num, base_type, values in cases:
+            with self.subTest(mesg_num=mesg_num, field_num=field_num):
+                data = _generate_messages(
+                    mesg_num, 1, [(field_num, base_type)],
+                    data=[(value,) for value in values])
+                with fitdecode.FitReader(_generate_fitfile(data)) as reader:
+                    decoded = [
+                        msg.get_value(field_num) for msg in reader
+                        if isinstance(msg, fitdecode.FitDataMessage)
+                        and msg.global_mesg_num == mesg_num]
+                self.assertEqual(decoded, list(values))
+
     def test_fitparse_speed(self):
         fit = fitdecode.FitReader(
             _test_file('2019-02-17-062644-ELEMNT-297E-195-0.fit'),
